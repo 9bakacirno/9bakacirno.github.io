@@ -1,1 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>9bakacirno ❄️</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Background -->
+    <div class="sky"></div>
+    <div class="moon"></div>
+
+    <!-- Animated particles -->
+    <div id="particles"></div>
+
+    <!-- Main container -->
+    <main class="container">
+
+        <!-- Header -->
+        <section class="hero">
+
+            <div class="ice-decoration">❄</div>
+
+            <p class="small-title">WELCOME TO MY LITTLE CORNER OF GENSOKYO</p>
+
+            <h1>
+                9baka<span>cirno</span>
+            </h1>
+
+            <p class="subtitle">
+                ❄️⑨ Ice Fairy's Internet Hideout 🦇
+            </p>
+
+            <div class="divider">
+                <span>✦</span>
+                <span>❄</span>
+                <span>✦</span>
+            </div>
+
+            <p class="description">
+                Just a random person on the internet who likes
+                Touhou, games, music and messing around with code.
+            </p>
+
+        </section>
+
+
+        <!-- Character cards -->
+        <section class="characters">
+
+            <div class="character cirno-card">
+
+                <div class="character-icon">❄️</div>
+
+                <div>
+                    <h2>Cirno</h2>
+                    <p>⑨ Strongest Ice Fairy</p>
+                </div>
+
+                <div class="badge">BAKA!</div>
+
+            </div>
+
+
+            <div class="character remilia-card">
+
+                <div class="character-icon">🦇</div>
+
+                <div>
+                    <h2>Remilia</h2>
+                    <p>Scarlet Devil Mansion</p>
+                </div>
+
+                <div class="badge red">495</div>
+
+            </div>
+
+        </section>
+
+
+        <!-- About -->
+        <section class="panel">
+
+            <div class="panel-title">
+                <span>❄</span>
+                <h2>About Me</h2>
+                <span>🦇</span>
+            </div>
+
+            <p>
+                Hey! I'm <strong>9bakacirno</strong>.
+            </p>
+
+            <p>
+                I'm into Touhou Project, Roblox, music,
+                random internet stuff and programming.
+                I also like making silly little websites.
+            </p>
+
+            <p class="quote">
+                「I'm the strongest!」
+            </p>
+
+        </section>
+
+
+        <!-- Links -->
+        <section class="panel">
+
+            <div class="panel-title">
+                <span>✦</span>
+                <h2>My Links</h2>
+                <span>✦</span>
+            </div>
+
+            <div class="links">
+
+                <a href="https://github.com/" target="_blank" class="link github">
+                    <span>💻</span>
+                    <span>GitHub</span>
+                    <span>→</span>
+                </a>
+
+                <a href="#" class="link bilibili">
+                    <span>📺</span>
+                    <span>Bilibili</span>
+                    <span>→</span>
+                </a>
+
+                <a href="#" class="link roblox">
+                    <span>🎮</span>
+                    <span>Roblox</span>
+                    <span>→</span>
+                </a>
+
+                <a href="#" class="link discord">
+                    <span>💬</span>
+                    <span>Discord</span>
+                    <span>→</span>
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- Music -->
+        <section class="panel music-panel">
+
+            <div class="panel-title">
+                <span>♪</span>
+                <h2>Music</h2>
+                <span>♪</span>
+            </div>
+
+            <p id="music-status">
+                No music playing
+            </p>
+
+            <button id="musicButton">
+                ▶ Play
+            </button>
+
+            <!-- Replace this file with your own audio file -->
+            <audio id="music" loop>
+                <source src="music.mp3" type="audio/mpeg">
+            </audio>
+
+        </section>
+
+
+        <!-- Secret -->
+        <section class="secret">
+
+            <button id="bakaButton">
+                DON'T CLICK THIS
+            </button>
+
+            <p id="bakaText"></p>
+
+        </section>
+
+
+        <!-- Footer -->
+        <footer>
+
+            <div class="footer-line"></div>
+
+            <p>
+                ❄️ Made with questionable amounts of ice magic ❄️
+            </p>
+
+            <p class="copyright">
+                ⑨ 9bakacirno · Gensokyo Internet Division
+            </p>
+
+        </footer>
+
+    </main>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
