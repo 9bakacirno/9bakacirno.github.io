@@ -82,3 +82,52 @@
     outline: 2px solid #a9e7ff;
     outline-offset: 5px;
 }
+
+/* =========================
+   MUSIC VERSION BUTTONS
+   Cirno × Remilia Theme
+========================= */
+
+.music-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.music-controls button {
+    font: inherit;
+    border: 1px solid rgba(142, 219, 255, 0.35);
+    border-radius: 12px;
+    padding: 9px 16px;
+    color: #dceeff;
+    background: rgba(100, 160, 220, 0.12);
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.music-controls button:hover {
+    background: rgba(142, 219, 255, 0.2);
+    border-color: #8edbff;
+    box-shadow: 0 0 10px rgba(142, 219, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.music-controls button.version-button.active {
+    color: #14283d;
+    background: linear-gradient(135deg, #b8eaff, #82cfff);
+    border-color: #c8efff;
+    box-shadow: 0 0 12px rgba(142, 219, 255, 0.22);
+    font-weight: 700;
+}
+
+.music-controls button:focus-visible {
+    outline: 2px solid #b8eaff;
+    outline-offset: 3px;
+}
+
