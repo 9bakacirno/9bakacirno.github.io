@@ -890,3 +890,59 @@ footer {
     background: rgba(142, 234, 255, 0.18);
     transform: scale(1.04);
 }
+
+/* =========================
+   SYNCHRONIZED LYRICS
+========================= */
+
+.lyrics-panel {
+    max-width: 560px;
+    margin: 24px auto 0;
+    padding: 20px 16px;
+    border: 1px solid rgba(142, 234, 255, 0.2);
+    border-radius: 16px;
+    background: rgba(7, 10, 24, 0.55);
+    box-shadow: inset 0 0 24px rgba(142, 234, 255, 0.035);
+    overflow: hidden;
+}
+
+.lyrics-heading {
+    margin: 0 0 14px !important;
+    color: var(--ice) !important;
+    font-size: 10px;
+    letter-spacing: 3px;
+}
+
+#lyricsDisplay {
+    height: 148px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(142, 234, 255, 0.35) transparent;
+    scroll-behavior: smooth;
+}
+
+.lyric-line {
+    margin: 0 !important;
+    padding: 7px 4px;
+    color: rgba(237, 250, 255, 0.4) !important;
+    font-size: 13px;
+    line-height: 1.7 !important;
+    transition: color 0.25s, transform 0.25s;
+}
+
+.lyric-line.active {
+    color: var(--ice-light) !important;
+    font-size: 15px;
+    font-weight: 700;
+    text-shadow: 0 0 14px rgba(142, 234, 255, 0.3);
+}
+
+@media (max-width: 650px) {
+    .lyrics-panel {
+        padding: 16px 10px;
+    }
+
+    #lyricsDisplay {
+        height: 132px;
+    }
+}
