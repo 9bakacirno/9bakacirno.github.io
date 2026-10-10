@@ -152,7 +152,6 @@ async function loadLyrics() {
 function updateLyrics() {
     if (!music || lyricLines.length === 0) return;
 
-    // Remember the original song's duration.
     if (
         musicVersion === "normal" &&
         Number.isFinite(music.duration) &&
@@ -162,9 +161,6 @@ function updateLyrics() {
     }
 
     const currentDuration = music.duration;
-
-    // Convert the Slowed playback position to the equivalent
-    // position in the Normal version's timeline.
     let lyricTime = music.currentTime;
 
     if (
@@ -187,14 +183,14 @@ function updateLyrics() {
         }
     }
 
-    if (nextIndex === activeLyricIndex) return;
-
-    if (activeLyricIndex >= 0 && lyricElements[activeLyricIndex]) {
-        lyricElements[activeLyricIndex].classList.remove("active");
-    }
+    // Remove all old highlights first
+    lyricElements.forEach((element) => {
+        element.classList.remove("active");
+    });
 
     activeLyricIndex = nextIndex;
 
+    // Highlight only the current lyric
     if (activeLyricIndex >= 0 && lyricElements[activeLyricIndex]) {
         const activeElement = lyricElements[activeLyricIndex];
 
@@ -205,7 +201,6 @@ function updateLyrics() {
         });
     }
 }
-
 loadLyrics();
 
 function formatTime(seconds) {
