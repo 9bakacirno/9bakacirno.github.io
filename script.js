@@ -77,14 +77,14 @@ function parseLRC(text) {
 
     for (const line of text.split(/\r?\n/)) {
         const timestamps = [
-            ...line.matchAll(/\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g)
-        ];
+             ...line.matchAll(/\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g)
+         ];
 
         if (timestamps.length === 0) continue;
 
         const lyric = line
-            .replace(/\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g, "")
-            .trim();
+          .replace(/\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g, "")
+          .trim();
 
         for (const match of timestamps) {
             const minutes = Number(match[1]);
@@ -143,10 +143,10 @@ async function loadLyrics() {
         lyricLines = parseLRC(text);
         renderLyrics();
     } catch (error) {
-        lyricsDisplay.textContent =
-            "Couldn't load lyrics — check awful.lrc.";
-        console.error(error);
-    }
+    lyricsDisplay.textContent =
+        "Lyrics error: " + error.message;
+    console.error("Lyrics loading failed:", error);
+   }
 }
 
 function updateLyrics() {
