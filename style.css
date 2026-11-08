@@ -30,6 +30,8 @@ html {
 body {
     margin: 0;
     min-height: 100vh;
+    position: relative;
+    isolation: isolate;
 
     color: var(--text);
 
@@ -38,6 +40,18 @@ body {
         Arial,
         sans-serif;
 
+    /* Keep the page base transparent so the fixed backdrop can cover
+       the viewport consistently in both scroll directions. */
+    background: transparent;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    pointer-events: none;
     background:
         radial-gradient(
             circle at 75% 15%,
@@ -50,9 +64,6 @@ body {
             #090e25 50%,
             #050611 100%
         );
-
-    overflow-x: hidden;
-    background-attachment: fixed;
 }
 
 
