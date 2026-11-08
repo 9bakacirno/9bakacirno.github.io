@@ -43,6 +43,32 @@ const music = document.getElementById("music");
 const musicButton = document.getElementById("musicButton");
 const musicStatus = document.getElementById("music-status");
 
+const musicToggle = document.getElementById("musicToggle");
+const musicPanel = document.getElementById("musicPanel");
+const musicClose = document.getElementById("musicClose");
+
+function setMusicPanelOpen(open) {
+    if (!musicPanel || !musicToggle) return;
+    musicPanel.hidden = !open;
+    musicToggle.setAttribute("aria-expanded", String(open));
+    musicToggle.setAttribute("aria-label", open ? "Close music player" : "Open music player");
+    musicToggle.classList.toggle("is-open", open);
+}
+
+if (musicToggle && musicPanel) {
+    musicToggle.addEventListener("click", () => {
+        setMusicPanelOpen(musicPanel.hidden);
+    });
+}
+if (musicClose) {
+    musicClose.addEventListener("click", () => setMusicPanelOpen(false));
+}
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && musicPanel && !musicPanel.hidden) {
+        setMusicPanelOpen(false);
+    }
+});
+
 const normalButton = document.getElementById("normalButton");
 const slowedButton = document.getElementById("slowedButton");
 
