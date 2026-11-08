@@ -1189,3 +1189,18 @@ footer {
         right: auto;
     }
 }
+
+
+/* Softer, gliding edge-dock motion */
+.music-widget {
+    transition: left 520ms cubic-bezier(0.22, 1, 0.36, 1), top 140ms ease-out;
+    will-change: left, top;
+}
+.music-widget.is-dragging {
+    transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .music-widget {
+        transition-duration: 1ms;
+    }
+}
