@@ -530,19 +530,15 @@ setInterval(() => {
         const maxTop = Math.max(8, window.innerHeight - widget.offsetHeight - 8);
         left = clamp(left, 0, maxLeft);
         top = clamp(top, 8, maxTop);
-        widget.style.left = left + "px";
+        // Animate a single numeric left position; transitioning between
+        // left/right and auto cannot interpolate smoothly in CSS.
+        const dockLeft = dock === "left" ? -22 : dock === "right" ? window.innerWidth - widget.offsetWidth + 22 : left;
+        widget.style.left = clamp(dockLeft, dock ? -22 : 0, dock ? window.innerWidth - widget.offsetWidth + 22 : maxLeft) + "px";
         widget.style.right = "auto";
         widget.style.top = top + "px";
         widget.style.transform = "none";
         widget.classList.toggle("docked-left", dock === "left");
-        widget.classList.toggle("docked-right", dock !== "left");
-        if (dock === "left") {
-            widget.style.left = "-22px";
-            widget.style.right = "auto";
-        } else if (dock === "right") {
-            widget.style.left = "auto";
-            widget.style.right = "-22px";
-        }
+        widget.classList.toggle("docked-right", dock === "right");
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify({
                 left: dock === "left" ? 0 : maxLeft,
