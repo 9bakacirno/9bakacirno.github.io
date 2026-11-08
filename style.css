@@ -946,3 +946,159 @@ footer {
         height: 132px;
     }
 }
+
+
+/* =========================
+   FLOATING MUSIC WIDGET
+========================= */
+.music-widget {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 100;
+}
+
+.music-toggle {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(142, 234, 255, 0.75);
+    border-radius: 50%;
+    color: #d9fbff;
+    background: rgba(10, 20, 43, 0.92);
+    box-shadow: 0 0 18px rgba(142, 234, 255, 0.28), 0 8px 24px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    font-size: 27px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.music-toggle:hover,
+.music-toggle.is-open {
+    transform: translateY(-3px);
+    background: rgba(30, 65, 92, 0.96);
+    box-shadow: 0 0 26px rgba(142, 234, 255, 0.42), 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.music-panel.panel {
+    position: absolute;
+    right: 0;
+    bottom: 70px;
+    width: min(340px, calc(100vw - 32px));
+    max-height: min(72vh, 620px);
+    overflow-y: auto;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    border-color: rgba(142, 234, 255, 0.35);
+    background: rgba(7, 12, 31, 0.96);
+    box-shadow: 0 18px 55px rgba(0, 0, 0, 0.5), 0 0 25px rgba(142, 234, 255, 0.12);
+    animation: music-pop-in 0.18s ease-out;
+}
+
+.music-panel[hidden] {
+    display: none !important;
+}
+
+.music-widget-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.music-widget-heading .panel-title {
+    margin-bottom: 8px;
+}
+
+.music-close {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(142, 234, 255, 0.25);
+    border-radius: 50%;
+    color: var(--ice);
+    background: rgba(142, 234, 255, 0.06);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.music-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.version-button {
+    padding: 9px 12px;
+    border: 1px solid rgba(142, 234, 255, 0.22);
+    border-radius: 999px;
+    color: var(--muted);
+    background: rgba(142, 234, 255, 0.04);
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.version-button.active {
+    color: var(--ice-light);
+    border-color: var(--ice);
+    background: rgba(142, 234, 255, 0.14);
+}
+
+.music-panel #music-status {
+    margin: 8px 0 16px;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+}
+
+.lyrics-panel {
+    margin-top: 18px;
+    padding: 12px;
+    border: 1px solid rgba(142, 234, 255, 0.14);
+    border-radius: 12px;
+    background: rgba(142, 234, 255, 0.035);
+}
+
+.lyrics-heading {
+    margin: 0 0 10px;
+    color: var(--ice) !important;
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+
+#lyricsDisplay {
+    max-height: 170px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(142, 234, 255, 0.45) transparent;
+}
+
+#lyricsDisplay .lyric-line {
+    margin: 7px 0;
+    font-size: 12px;
+}
+
+@keyframes music-pop-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 650px) {
+    .music-widget {
+        right: 14px;
+        bottom: 14px;
+    }
+    .music-toggle {
+        width: 50px;
+        height: 50px;
+    }
+    .music-panel.panel {
+        bottom: 62px;
+        width: min(320px, calc(100vw - 28px));
+        padding: 17px;
+    }
+}
