@@ -506,3 +506,132 @@ setInterval(() => {
 
     document.title = titles[titleIndex];
 }, 5000);
+
+
+/* =========================
+   DRAG / EDGE DOCK MUSIC WIDGET
+========================= */
+(() => {
+    const widget = document.querySelector(".music-widget");
+    const handle = document.getElementById("musicToggle");
+    const heading = document.querySelector(".music-widget-heading");
+    if (!widget || !handle) return;
+
+    const STORAGE_KEY = "cirnoMusicWidgetPosition";
+    let drag = null;
+    let suppressClick = false;
+
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    function applyPosition(left, top, dock = null) {
+        const maxLeft = Math.max(0, window.innerWidth - widget.offsetWidth);
+        const maxTop = Math.max(8, window.innerHeight - widget.offsetHeight - 8);
+        left = clamp(left, 0, maxLeft);
+        top = clamp(top, 8, maxTop);
+        widget.style.left = left + "px";
+        widget.style.right = "auto";
+        widget.style.top = top + "px";
+        widget.style.transform = "none";
+        widget.classList.toggle("docked-left", dock === "left");
+        widget.classList.toggle("docked-right", dock !== "left");
+        if (dock === "left") {
+            widget.style.left = "-22px";
+            widget.style.right = "auto";
+        } else if (dock === "right") {
+            widget.style.left = "auto";
+            widget.style.right = "-22px";
+        }
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                left: dock === "left" ? 0 : maxLeft,
+                top,
+                dock: dock || "right"
+            }));
+        } catch (_) {}
+    }
+
+    function restorePosition() {
+        let saved = null;
+        try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch (_) {}
+        if (saved && Number.isFinite(saved.top)) {
+            applyPosition(saved.left || 0, saved.top, saved.dock === "left" ? "left" : "right");
+        } else {
+            applyPosition(window.innerWidth - widget.offsetWidth, window.innerHeight / 2 - widget.offsetHeight / 2, "right");
+        }
+    }
+
+    function startDrag(event, source) {
+        if (event.button !== undefined && event.button !== 0) return;
+        if (event.target.closest("button") && source === heading && event.target !== heading) return;
+        const rect = widget.getBoundingClientRect();
+        drag = {
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            left: rect.left,
+            top: rect.top,
+            moved: false
+        };
+        widget.classList.add("is-dragging");
+        if (source.setPointerCapture && event.pointerId !== undefined) {
+            try { source.setPointerCapture(event.pointerId); } catch (_) {}
+        }
+        event.preventDefault();
+    }
+
+    function moveDrag(event) {
+        if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
+        const dx = event.clientX - drag.startX;
+        const dy = event.clientY - drag.startY;
+        if (Math.abs(dx) + Math.abs(dy) > 5) drag.moved = true;
+        if (!drag.moved) return;
+        const maxLeft = Math.max(0, window.innerWidth - widget.offsetWidth);
+        const maxTop = Math.max(8, window.innerHeight - widget.offsetHeight - 8);
+        widget.style.left = clamp(drag.left + dx, 0, maxLeft) + "px";
+        widget.style.right = "auto";
+        widget.style.top = clamp(drag.top + dy, 8, maxTop) + "px";
+        widget.style.transform = "none";
+        widget.classList.remove("docked-left", "docked-right");
+    }
+
+    function endDrag(event) {
+        if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
+        const moved = drag.moved;
+        const rect = widget.getBoundingClientRect();
+        const dock = rect.left + rect.width / 2 < window.innerWidth / 2 ? "left" : "right";
+        const top = clamp(rect.top, 8, window.innerHeight - widget.offsetHeight - 8);
+        drag = null;
+        widget.classList.remove("is-dragging");
+        if (moved) {
+            applyPosition(dock === "left" ? 0 : window.innerWidth - widget.offsetWidth, top, dock);
+            suppressClick = true;
+            window.setTimeout(() => { suppressClick = false; }, 180);
+        }
+    }
+
+    handle.addEventListener("pointerdown", event => startDrag(event, handle));
+    if (heading) heading.addEventListener("pointerdown", event => {
+        if (event.target.closest("button")) return;
+        startDrag(event, heading);
+    });
+    window.addEventListener("pointermove", moveDrag);
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
+
+    handle.addEventListener("click", event => {
+        if (suppressClick) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+    }, true);
+
+    window.addEventListener("resize", () => {
+        const rect = widget.getBoundingClientRect();
+        const dock = widget.classList.contains("docked-left") ? "left" : "right";
+        applyPosition(dock === "left" ? 0 : window.innerWidth - widget.offsetWidth, rect.top, dock);
+    });
+
+    restorePosition();
+})();
