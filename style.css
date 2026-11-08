@@ -1217,3 +1217,43 @@ footer {
         transition-duration: 1ms;
     }
 }
+
+
+/* Keep Play/Pause, Normal and Slowed on one horizontal line */
+.music-widget .music-controls {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.music-widget .music-controls button {
+    flex: 0 0 auto;
+    min-width: 0;
+    white-space: nowrap;
+    margin: 0;
+    line-height: 1.2;
+    padding: 9px 10px;
+}
+
+.music-widget .music-controls #musicButton {
+    padding: 11px 16px;
+}
+
+@media (max-width: 650px) {
+    .music-widget .music-controls {
+        gap: 5px;
+    }
+
+    .music-widget .music-controls button {
+        padding: 8px 8px;
+        font-size: 12px;
+    }
+
+    .music-widget .music-controls #musicButton {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+}
