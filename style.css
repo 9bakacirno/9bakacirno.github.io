@@ -953,8 +953,9 @@ footer {
 ========================= */
 .music-widget {
     position: fixed;
-    right: 22px;
-    bottom: 22px;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
     z-index: 100;
 }
 
@@ -976,16 +977,18 @@ footer {
 
 .music-toggle:hover,
 .music-toggle.is-open {
-    transform: translateY(-3px);
+    transform: translateX(-3px);
     background: rgba(30, 65, 92, 0.96);
     box-shadow: 0 0 26px rgba(142, 234, 255, 0.42), 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .music-panel.panel {
     position: absolute;
-    right: 0;
-    bottom: 70px;
-    width: min(340px, calc(100vw - 32px));
+    right: 70px;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    width: min(340px, calc(100vw - 110px));
     max-height: min(72vh, 620px);
     overflow-y: auto;
     margin: 0;
@@ -994,7 +997,7 @@ footer {
     border-color: rgba(142, 234, 255, 0.35);
     background: rgba(7, 12, 31, 0.96);
     box-shadow: 0 18px 55px rgba(0, 0, 0, 0.5), 0 0 25px rgba(142, 234, 255, 0.12);
-    animation: music-pop-in 0.18s ease-out;
+    animation: music-pop-in-side 0.18s ease-out;
 }
 
 .music-panel[hidden] {
@@ -1082,23 +1085,28 @@ footer {
     font-size: 12px;
 }
 
-@keyframes music-pop-in {
-    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+@keyframes music-pop-in-side {
+    from { opacity: 0; transform: translateY(calc(-50% + 8px)) scale(0.98); }
+    to { opacity: 1; transform: translateY(-50%) scale(1); }
+}
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @media (max-width: 650px) {
     .music-widget {
-        right: 14px;
-        bottom: 14px;
+        right: 10px;
+        top: 50%;
     }
     .music-toggle {
-        width: 50px;
-        height: 50px;
+        width: 48px;
+        height: 48px;
     }
     .music-panel.panel {
-        bottom: 62px;
-        width: min(320px, calc(100vw - 28px));
-        padding: 17px;
+        right: 60px;
+        top: 50%;
+        bottom: auto;
+        width: min(300px, calc(100vw - 82px));
+        max-height: 76vh;
+        padding: 15px;
     }
 }
