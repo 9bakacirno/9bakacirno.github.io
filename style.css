@@ -24,6 +24,7 @@
 
 html {
     scroll-behavior: smooth;
+    background-color: #050611;
 }
 
 body {
@@ -51,6 +52,7 @@ body {
         );
 
     overflow-x: hidden;
+    background-attachment: fixed;
 }
 
 
