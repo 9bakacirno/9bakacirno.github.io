@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Press+Start+2P&display=swap');
 
 :root {
     --ice: #8eeaff;
@@ -1378,7 +1378,6 @@ footer {
 /* =========================
    PIXEL LOCAL CLOCK
 ========================= */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 .pixel-clock {
     position: fixed;
