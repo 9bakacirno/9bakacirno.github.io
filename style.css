@@ -1257,3 +1257,119 @@ footer {
         font-size: 12px;
     }
 }
+
+
+/* =========================
+   LIQUID GLASS / WATER-DROP MUSIC PLAYER
+========================= */
+.music-widget .music-toggle {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: 1px solid rgba(207, 248, 255, 0.82);
+    background:
+        radial-gradient(ellipse at 28% 18%, rgba(255,255,255,.88) 0%, rgba(255,255,255,.28) 13%, transparent 32%),
+        radial-gradient(ellipse at 72% 82%, rgba(71, 177, 232, .3), transparent 48%),
+        linear-gradient(145deg, rgba(199, 246, 255, .36), rgba(36, 112, 164, .23) 45%, rgba(7, 21, 51, .74));
+    box-shadow:
+        inset 2px 3px 7px rgba(255,255,255,.35),
+        inset -4px -5px 12px rgba(4,20,48,.38),
+        0 0 18px rgba(142,234,255,.28),
+        0 9px 26px rgba(0,0,0,.32);
+    backdrop-filter: blur(16px) saturate(155%);
+    -webkit-backdrop-filter: blur(16px) saturate(155%);
+    transition: border-color .35s ease, box-shadow .35s ease, filter .35s ease;
+}
+
+.music-widget .music-toggle::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -45% -70%;
+    pointer-events: none;
+    background: linear-gradient(110deg, transparent 38%, rgba(255,255,255,.38) 47%, rgba(214,250,255,.12) 52%, transparent 61%);
+    transform: translateX(-48%) rotate(8deg);
+    animation: droplet-glint 7s ease-in-out infinite;
+}
+
+.music-widget .music-toggle::after {
+    content: "";
+    position: absolute;
+    top: 9px;
+    left: 13px;
+    width: 12px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.82);
+    filter: blur(1px);
+    transform: rotate(-35deg);
+    pointer-events: none;
+}
+
+.music-widget .music-toggle:hover,
+.music-widget .music-toggle.is-open {
+    filter: brightness(1.12);
+    border-color: rgba(235, 253, 255, .98);
+    box-shadow:
+        inset 2px 3px 8px rgba(255,255,255,.42),
+        inset -4px -5px 12px rgba(4,20,48,.3),
+        0 0 28px rgba(142,234,255,.48),
+        0 10px 28px rgba(0,0,0,.34);
+}
+
+.music-widget .music-toggle > * {
+    filter: drop-shadow(0 1px 2px rgba(4, 23, 44, .55));
+}
+
+.music-widget .music-panel.panel {
+    border: 1px solid rgba(196, 244, 255, .42);
+    border-radius: 24px;
+    background:
+        radial-gradient(ellipse at 16% 0%, rgba(190,244,255,.15), transparent 44%),
+        linear-gradient(145deg, rgba(20, 43, 72, .88), rgba(5, 12, 31, .94) 68%);
+    box-shadow:
+        inset 1px 1px 0 rgba(255,255,255,.18),
+        inset -1px -1px 0 rgba(142,234,255,.07),
+        0 18px 55px rgba(0,0,0,.48),
+        0 0 32px rgba(91,192,232,.14);
+    backdrop-filter: blur(22px) saturate(145%);
+    -webkit-backdrop-filter: blur(22px) saturate(145%);
+}
+
+.music-widget .music-controls button,
+.music-widget .music-close {
+    border-color: rgba(197, 244, 255, .38);
+    background:
+        radial-gradient(ellipse at 28% 12%, rgba(255,255,255,.22), transparent 42%),
+        linear-gradient(145deg, rgba(157,226,250,.18), rgba(37,91,133,.12));
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,.18);
+    backdrop-filter: blur(8px);
+}
+
+.music-widget .music-controls button:hover,
+.music-widget .music-close:hover {
+    border-color: rgba(224, 251, 255, .78);
+    background:
+        radial-gradient(ellipse at 28% 12%, rgba(255,255,255,.3), transparent 42%),
+        linear-gradient(145deg, rgba(157,226,250,.28), rgba(37,91,133,.2));
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,.26), 0 0 14px rgba(142,234,255,.15);
+}
+
+.music-widget .music-controls button.version-button.active {
+    color: #102b43;
+    border-color: rgba(239, 253, 255, .95);
+    background:
+        radial-gradient(ellipse at 25% 8%, rgba(255,255,255,.95), transparent 42%),
+        linear-gradient(145deg, #d8f8ff, #8bdcff 68%, #6cc5f0);
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,.82), 0 0 14px rgba(142,234,255,.24);
+}
+
+@keyframes droplet-glint {
+    0%, 18% { transform: translateX(-55%) rotate(8deg); opacity: .3; }
+    48% { opacity: .75; }
+    78%, 100% { transform: translateX(55%) rotate(8deg); opacity: .3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .music-widget .music-toggle::before { animation: none; }
+}
