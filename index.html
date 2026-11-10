@@ -12,6 +12,20 @@
 
 <body>
 
+
+    <!-- Local pixel clock -->
+    <aside class="pixel-clock" id="pixelClock" aria-label="Local time clock">
+        <div class="pixel-clock-top">
+            <span class="pixel-clock-label">LOCAL TIME</span>
+            <button id="clockLightToggle" class="clock-light-toggle is-lit" type="button"
+                    aria-pressed="true" aria-label="Turn clock light off" title="Toggle clock light">
+                <span class="clock-lamp" aria-hidden="true"></span>
+            </button>
+        </div>
+        <div class="pixel-clock-time" id="localClockTime" role="timer" aria-live="off">00:00:00</div>
+        <div class="pixel-clock-date" id="localClockDate">---</div>
+    </aside>
+
     <!-- Background -->
     <div class="sky"></div>
     <div class="moon"></div>
