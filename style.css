@@ -1373,3 +1373,123 @@ footer {
 @media (prefers-reduced-motion: reduce) {
     .music-widget .music-toggle::before { animation: none; }
 }
+
+
+/* =========================
+   PIXEL LOCAL CLOCK
+========================= */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.pixel-clock {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 40;
+    width: max-content;
+    max-width: calc(100vw - 28px);
+    padding: 13px 14px 12px;
+    border: 1px solid rgba(142, 234, 255, .38);
+    border-radius: 8px;
+    color: #dffaff;
+    background:
+        linear-gradient(145deg, rgba(16, 35, 57, .82), rgba(5, 12, 29, .78));
+    box-shadow: 0 0 18px rgba(83, 204, 255, .12), inset 1px 1px 0 rgba(255,255,255,.12);
+    backdrop-filter: blur(14px) saturate(135%);
+    -webkit-backdrop-filter: blur(14px) saturate(135%);
+    font-family: "Press Start 2P", monospace;
+    transition: border-color .25s ease, box-shadow .25s ease, opacity .25s ease;
+}
+
+.pixel-clock-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.pixel-clock-label {
+    font-size: 7px;
+    line-height: 1.6;
+    letter-spacing: .4px;
+    color: rgba(194, 237, 255, .7);
+}
+
+.clock-light-toggle {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: 1px solid rgba(142, 234, 255, .5);
+    border-radius: 5px;
+    background: rgba(142, 234, 255, .08);
+    cursor: pointer;
+}
+
+.clock-lamp {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: #52717d;
+    box-shadow: none;
+    transition: background .2s ease, box-shadow .2s ease;
+}
+
+.clock-light-toggle.is-lit .clock-lamp {
+    background: #a9f2ff;
+    box-shadow: 0 0 5px #8eeaff, 0 0 12px rgba(142, 234, 255, .8);
+}
+
+.pixel-clock-time {
+    font-size: clamp(10px, 1.1vw, 13px);
+    line-height: 1.8;
+    letter-spacing: .5px;
+    white-space: nowrap;
+    color: #bcefff;
+    text-shadow: 0 0 8px rgba(142, 234, 255, .45);
+    font-variant-numeric: tabular-nums;
+}
+
+.pixel-clock-date {
+    margin-top: 7px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 7px;
+    line-height: 1.8;
+    color: rgba(194, 237, 255, .68);
+    white-space: nowrap;
+}
+
+.pixel-clock.is-unlit {
+    border-color: rgba(160, 176, 192, .22);
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,.06);
+}
+
+.pixel-clock.is-unlit .pixel-clock-time {
+    color: #82909e;
+    text-shadow: none;
+}
+
+.pixel-clock.is-unlit .pixel-clock-date,
+.pixel-clock.is-unlit .pixel-clock-label {
+    color: rgba(160, 176, 192, .55);
+}
+
+.clock-light-toggle:focus-visible {
+    outline: 2px solid #bcefff;
+    outline-offset: 3px;
+}
+
+@media (max-width: 650px) {
+    .pixel-clock {
+        top: 10px;
+        right: 10px;
+        padding: 10px;
+    }
+    .pixel-clock-label, .pixel-clock-date { font-size: 6px; }
+    .pixel-clock-time { font-size: 10px; }
+    .pixel-clock-top { margin-bottom: 8px; gap: 8px; }
+    .clock-light-toggle { width: 22px; height: 22px; }
+}
