@@ -631,3 +631,43 @@ setInterval(() => {
 
     restorePosition();
 })();
+
+
+/* =========================
+   PIXEL LOCAL CLOCK
+   Uses the visitor's device-local timezone.
+========================= */
+(() => {
+    const clock = document.getElementById("pixelClock");
+    const timeDisplay = document.getElementById("localClockTime");
+    const dateDisplay = document.getElementById("localClockDate");
+    const lightToggle = document.getElementById("clockLightToggle");
+    if (!clock || !timeDisplay || !dateDisplay || !lightToggle) return;
+
+    function updateLocalClock() {
+        const now = new Date();
+        timeDisplay.textContent = new Intl.DateTimeFormat(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false
+        }).format(now);
+
+        dateDisplay.textContent = new Intl.DateTimeFormat(undefined, {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+        }).format(now);
+    }
+
+    lightToggle.addEventListener("click", () => {
+        const isLit = lightToggle.getAttribute("aria-pressed") !== "true";
+        lightToggle.setAttribute("aria-pressed", String(isLit));
+        lightToggle.setAttribute("aria-label", isLit ? "Turn clock light off" : "Turn clock light on");
+        lightToggle.classList.toggle("is-lit", isLit);
+        clock.classList.toggle("is-unlit", !isLit);
+    });
+
+    updateLocalClock();
+    window.setInterval(updateLocalClock, 1000);
+})();
