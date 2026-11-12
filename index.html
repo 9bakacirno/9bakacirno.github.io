@@ -235,47 +235,68 @@
     </main>
 
 
-    <!-- Floating music widget: kept outside the main layout -->
-    <!-- Floating music widget -->
-            <div class="music-widget">
-                <button id="musicToggle" class="music-toggle" type="button"
-                        aria-expanded="false" aria-controls="musicPanel"
-                        aria-label="Open music player" title="Music player">♪</button>
-    
-                <section class="panel music-panel" id="musicPanel" aria-label="Music player" hidden>
-                    <div class="music-widget-heading">
-                        <div class="panel-title">
-                            <span>❄</span>
-                            <h2>Music</h2>
-                            <span>♪</span>
-                        </div>
-                        <button id="musicClose" class="music-close" type="button" aria-label="Close music player">×</button>
-                    </div>
-    
-                    <p id="music-status">Nico’s Nextbots OST — Menu (Holiday &amp; In-Game Version)</p>
-    
-                    <div class="music-controls">
-                        <button id="musicButton" type="button">▶ Play</button>
+    <!-- Floating dual music players -->
+    <div class="music-widget">
+        <button id="musicToggle" class="music-toggle" type="button"
+                aria-expanded="false" aria-controls="musicPanel"
+                aria-label="Open music players" title="Music players">♪</button>
 
-                    </div>
-    
-                    <div class="music-progress">
-                        <div class="music-time">
-                            <span id="currentTime">0:00</span>
-                            <span id="duration">0:00</span>
-                        </div>
-                        <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1" aria-label="Music progress">
-                    </div>
-    
-
-    
-                    <audio id="music" loop preload="metadata">
-                        <source src="menu-holiday.mp3" type="audio/mpeg">
-                    </audio>
-                </section>
+        <section class="panel music-panel" id="musicPanel" aria-label="Music players" hidden>
+            <div class="music-widget-heading">
+                <div class="panel-title">
+                    <span>❄</span>
+                    <h2>Music Corner</h2>
+                    <span>♪</span>
+                </div>
+                <button id="musicClose" class="music-close" type="button" aria-label="Close music players">×</button>
             </div>
-    
-    
+
+            <!-- Dedicated Menu OST player -->
+            <section class="mini-player" aria-label="Menu soundtrack player">
+                <p class="mini-player-label">❄ MENU SOUNDTRACK</p>
+                <h3 class="mini-player-title">Nico’s Nextbots OST</h3>
+                <p class="mini-player-subtitle">Menu (Holiday &amp; In-Game Version)</p>
+                <audio id="menuAudio" loop preload="metadata">
+                    <source src="menu-holiday.mp3" type="audio/mpeg">
+                </audio>
+                <div class="mini-player-controls">
+                    <button id="menuPlayButton" type="button">▶ Play</button>
+                </div>
+                <div class="music-progress">
+                    <div class="music-time">
+                        <span id="menuCurrentTime">0:00</span>
+                        <span id="menuDuration">0:00</span>
+                    </div>
+                    <input type="range" id="menuProgressBar" min="0" max="100" value="0" step="0.1" aria-label="Menu soundtrack progress">
+                </div>
+                <p id="menuStatus" class="mini-player-status">Menu OST · Ready</p>
+            </section>
+
+            <!-- General music library: add more options here as the collection grows -->
+            <section class="mini-player library-player" aria-label="Other music player">
+                <p class="mini-player-label">♪ OTHER MUSIC</p>
+                <label class="track-label" for="libraryTrack">Choose a track</label>
+                <select id="libraryTrack" class="track-select">
+                    <option value="awful.mp3">AWFUL — nicopatty</option>
+                </select>
+                <audio id="libraryAudio" preload="metadata">
+                    <source src="awful.mp3" type="audio/mpeg">
+                </audio>
+                <div class="mini-player-controls">
+                    <button id="libraryPlayButton" type="button">▶ Play</button>
+                </div>
+                <div class="music-progress">
+                    <div class="music-time">
+                        <span id="libraryCurrentTime">0:00</span>
+                        <span id="libraryDuration">0:00</span>
+                    </div>
+                    <input type="range" id="libraryProgressBar" min="0" max="100" value="0" step="0.1" aria-label="Other music progress">
+                </div>
+                <p id="libraryStatus" class="mini-player-status">AWFUL — nicopatty · Ready</p>
+            </section>
+        </section>
+    </div>
+
     <!-- JavaScript -->
     <script src="script.js"></script>
 
