@@ -635,8 +635,13 @@ setInterval(() => {
             const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
             if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
             if (!drag.moved) return;
-            const left = Math.max(0, Math.min(window.innerWidth - win.offsetWidth, drag.left + dx));
-            const top = Math.max(0, Math.min(window.innerHeight - 100, drag.top + dy));
+            // Keep the entire window inside the visible desktop area.
+            const taskbar = document.querySelector(".os-taskbar");
+            const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
+            const maxLeft = Math.max(0, window.innerWidth - win.offsetWidth);
+            const maxTop = Math.max(0, window.innerHeight - taskbarHeight - win.offsetHeight);
+            const left = Math.max(0, Math.min(maxLeft, drag.left + dx));
+            const top = Math.max(0, Math.min(maxTop, drag.top + dy));
             win.style.left = left + "px";
             win.style.top = top + "px";
             win.style.transform = "none";
@@ -691,8 +696,12 @@ setInterval(() => {
     window.addEventListener("resize", () => {
         document.querySelectorAll(".os-window:not(.is-maximized)").forEach(win => {
             if (win.style.left && win.style.transform === "none") {
-                win.style.left = Math.max(0, Math.min(window.innerWidth - win.offsetWidth, parseFloat(win.style.left))) + "px";
-                win.style.top = Math.max(0, Math.min(window.innerHeight - 100, parseFloat(win.style.top) || 0)) + "px";
+                const taskbar = document.querySelector(".os-taskbar");
+                const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
+                const maxLeft = Math.max(0, window.innerWidth - win.offsetWidth);
+                const maxTop = Math.max(0, window.innerHeight - taskbarHeight - win.offsetHeight);
+                win.style.left = Math.max(0, Math.min(maxLeft, parseFloat(win.style.left) || 0)) + "px";
+                win.style.top = Math.max(0, Math.min(maxTop, parseFloat(win.style.top) || 0)) + "px";
             }
         });
     });
