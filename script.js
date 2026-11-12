@@ -516,3 +516,184 @@ setInterval(() => {
     updateLocalClock();
     window.setInterval(updateLocalClock, 1000);
 })();
+
+
+/* =========================================================
+   ICE FAIRY OS — desktop, window manager, start menu & settings
+========================================================= */
+(() => {
+    const body = document.body;
+    const boot = document.getElementById("osBoot");
+    const bootSkip = document.getElementById("bootSkip");
+    const desktop = document.getElementById("osDesktop");
+    const homeWindow = document.getElementById("homeWindow");
+    const settingsWindow = document.getElementById("settingsWindow");
+    const homeBody = document.getElementById("homeWindowBody");
+    const startButton = document.getElementById("osStartButton");
+    const startMenu = document.getElementById("osStartMenu");
+    const settingsTaskbar = document.getElementById("settingsTaskbar");
+    const clock = document.getElementById("pixelClock");
+    const particles = document.getElementById("particles");
+    if (!desktop || !homeWindow || !homeBody) return;
+
+    body.classList.add("os-mode", "os-booting");
+    const originalContainer = document.querySelector("main.container");
+    if (originalContainer) homeBody.appendChild(originalContainer);
+
+    const windows = { home: homeWindow, settings: settingsWindow };
+    let topZ = 25;
+    const zUp = (win) => { if (win) win.style.zIndex = String(++topZ); };
+    const setTaskbarActive = (id, active) => {
+        const button = document.querySelector('[data-restore="' + id + '"]');
+        if (button) button.classList.toggle("active", !!active);
+    };
+    function showWindow(id) {
+        const win = windows[id];
+        if (!win) return;
+        win.hidden = false;
+        win.classList.remove("is-minimized");
+        zUp(win);
+        setTaskbarActive(id, true);
+        if (id === "settings" && settingsTaskbar) settingsTaskbar.hidden = false;
+        closeStartMenu();
+    }
+    function hideWindow(id) {
+        const win = windows[id];
+        if (!win) return;
+        win.hidden = true;
+        setTaskbarActive(id, false);
+        if (id === "settings" && settingsTaskbar) settingsTaskbar.hidden = true;
+    }
+    function minimizeWindow(id) {
+        const win = windows[id];
+        if (!win) return;
+        win.classList.add("is-minimized");
+        setTaskbarActive(id, false);
+    }
+    function closeStartMenu() {
+        startMenu.hidden = true;
+        startButton.setAttribute("aria-expanded", "false");
+    }
+    function openMusic() {
+        const toggle = document.getElementById("musicToggle");
+        if (toggle) {
+            const menu = document.getElementById("menuMusicPanel");
+            const awful = document.getElementById("awfulMusicPanel");
+            if (menu && awful && menu.hidden && awful.hidden) toggle.click();
+        }
+        closeStartMenu();
+    }
+    document.querySelectorAll("[data-os-open]").forEach((button) => {
+        button.addEventListener("click", () => {
+            const id = button.getAttribute("data-os-open");
+            if (id === "music") openMusic();
+            else showWindow(id);
+        });
+    });
+    document.querySelectorAll("[data-close]").forEach(button => button.addEventListener("click", () => hideWindow(button.dataset.close)));
+    document.querySelectorAll("[data-minimize]").forEach(button => button.addEventListener("click", () => minimizeWindow(button.dataset.minimize)));
+    document.querySelectorAll("[data-maximize]").forEach(button => button.addEventListener("click", () => {
+        const win = windows[button.dataset.maximize];
+        if (win) { win.classList.toggle("is-maximized"); zUp(win); }
+    }));
+    document.querySelectorAll("[data-restore]").forEach(button => button.addEventListener("click", () => {
+        const id = button.dataset.restore;
+        const win = windows[id];
+        if (win && !win.hidden && !win.classList.contains("is-minimized")) minimizeWindow(id);
+        else showWindow(id);
+    }));
+    startButton.addEventListener("click", () => {
+        const willOpen = startMenu.hidden;
+        startMenu.hidden = !willOpen;
+        startButton.setAttribute("aria-expanded", String(willOpen));
+    });
+    document.addEventListener("pointerdown", event => {
+        if (!startMenu.hidden && !startMenu.contains(event.target) && !startButton.contains(event.target) && !event.target.closest("[data-os-open]")) closeStartMenu();
+        const win = event.target.closest(".os-window");
+        if (win) zUp(win);
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeStartMenu();
+    });
+
+    // Drag windows by their titlebars; pointer events work with mouse and touch.
+    document.querySelectorAll("[data-drag-window]").forEach(bar => {
+        const id = bar.dataset.dragWindow;
+        const win = windows[id];
+        if (!win) return;
+        let drag = null;
+        bar.addEventListener("pointerdown", event => {
+            if (event.target.closest("button") || win.classList.contains("is-maximized")) return;
+            if (event.button !== undefined && event.button !== 0) return;
+            const rect = win.getBoundingClientRect();
+            drag = { x:event.clientX, y:event.clientY, left:rect.left, top:rect.top, moved:false };
+            try { bar.setPointerCapture(event.pointerId); } catch (_) {}
+            zUp(win);
+        });
+        bar.addEventListener("pointermove", event => {
+            if (!drag) return;
+            const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
+            if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+            if (!drag.moved) return;
+            const left = Math.max(0, Math.min(window.innerWidth - win.offsetWidth, drag.left + dx));
+            const top = Math.max(0, Math.min(window.innerHeight - 100, drag.top + dy));
+            win.style.left = left + "px";
+            win.style.top = top + "px";
+            win.style.transform = "none";
+        });
+        const endDrag = () => { drag = null; };
+        bar.addEventListener("pointerup", endDrag);
+        bar.addEventListener("pointercancel", endDrag);
+    });
+
+    // Persist personalization locally, without changing any audio/player logic.
+    const settingMap = [
+        ["settingSnow", "snow", enabled => body.classList.toggle("os-snow-off", !enabled)],
+        ["settingGlass", "glass", enabled => body.classList.toggle("os-glass-off", !enabled)],
+        ["settingClock", "clock", enabled => { if (clock) clock.style.display = enabled ? "" : "none"; }]
+    ];
+    let savedSettings = {};
+    try { savedSettings = JSON.parse(localStorage.getItem("iceFairyOSSettings") || "{}"); } catch (_) {}
+    settingMap.forEach(([id, key, apply]) => {
+        const control = document.getElementById(id);
+        if (!control) return;
+        if (typeof savedSettings[key] === "boolean") control.checked = savedSettings[key];
+        apply(control.checked);
+        control.addEventListener("change", () => {
+            apply(control.checked);
+            savedSettings[key] = control.checked;
+            try { localStorage.setItem("iceFairyOSSettings", JSON.stringify(savedSettings)); } catch (_) {}
+        });
+    });
+    const doneButton = document.getElementById("settingsDone");
+    if (doneButton) doneButton.addEventListener("click", () => hideWindow("settings"));
+
+    function updateTaskbarClock() {
+        const now = new Date();
+        const time = document.getElementById("taskbarTime");
+        const date = document.getElementById("taskbarDate");
+        if (time) time.textContent = new Intl.DateTimeFormat(undefined, {hour:"2-digit", minute:"2-digit", hour12:false}).format(now);
+        if (date) date.textContent = new Intl.DateTimeFormat(undefined, {month:"short", day:"2-digit"}).format(now);
+    }
+    updateTaskbarClock();
+    window.setInterval(updateTaskbarClock, 1000);
+
+    function finishBoot() {
+        if (!boot || boot.classList.contains("is-done")) return;
+        const status = document.getElementById("bootStatus");
+        if (status) status.textContent = "Welcome to Gensokyo.";
+        boot.classList.add("is-done");
+        body.classList.remove("os-booting");
+        window.setTimeout(() => { if (boot.parentNode) boot.remove(); }, 800);
+    }
+    if (bootSkip) bootSkip.addEventListener("click", finishBoot);
+    window.setTimeout(finishBoot, 2900);
+    window.addEventListener("resize", () => {
+        document.querySelectorAll(".os-window:not(.is-maximized)").forEach(win => {
+            if (win.style.left && win.style.transform === "none") {
+                win.style.left = Math.max(0, Math.min(window.innerWidth - win.offsetWidth, parseFloat(win.style.left))) + "px";
+                win.style.top = Math.max(0, Math.min(window.innerHeight - 100, parseFloat(win.style.top) || 0)) + "px";
+            }
+        });
+    });
+})();
