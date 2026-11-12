@@ -7,11 +7,82 @@
     <title>9bakacirno ❄️</title>
     <link rel="icon" type="image/png" href="favicon.png">
 
-    <link rel="stylesheet" href="style.css?v=single-droplet-20261112">
+    <link rel="stylesheet" href="style.css?v=ice-fairy-os-20261112">
 </head>
 
 <body>
 
+
+
+    <!-- ICE FAIRY OS boot screen -->
+    <section id="osBoot" class="os-boot" aria-label="ICE FAIRY OS startup">
+        <div class="boot-orbit"><span>❄</span><i>✦</i><b>⑨</b></div>
+        <p class="boot-kicker">GENSOKYO SYSTEMS</p>
+        <h1 class="boot-logo">ICE FAIRY <span>OS</span></h1>
+        <p class="boot-status" id="bootStatus">Initializing Gensokyo...</p>
+        <div class="boot-progress"><span></span></div>
+        <button type="button" id="bootSkip">Skip startup ↗</button>
+    </section>
+
+    <!-- Desktop layer -->
+    <div class="os-desktop" id="osDesktop">
+        <div class="os-wallpaper-glow"></div>
+        <div class="os-brandmark"><span>⑨</span><div><strong>ICE FAIRY OS</strong><small>Gensokyo build · 2026</small></div></div>
+        <nav class="desktop-icons" aria-label="Desktop apps">
+            <button class="desktop-icon" data-os-open="home"><span>❄️</span><b>Welcome</b></button>
+            <button class="desktop-icon" data-os-open="music"><span>🎵</span><b>Music</b></button>
+            <button class="desktop-icon" data-os-open="settings"><span>⚙️</span><b>Settings</b></button>
+            <a class="desktop-icon" href="https://github.com/9bakacirno" target="_blank" rel="noopener"><span>💻</span><b>GitHub</b></a>
+        </nav>
+        <div class="os-window home-os-window" id="homeWindow" data-window="home" aria-label="Welcome window">
+            <div class="os-titlebar" data-drag-window="home">
+                <div class="os-window-app"><span>❄</span><strong>Welcome to Gensokyo</strong></div>
+                <div class="os-window-controls">
+                    <button type="button" data-minimize="home" aria-label="Minimize window">−</button>
+                    <button type="button" data-maximize="home" aria-label="Maximize window">□</button>
+                    <button type="button" data-close="home" aria-label="Close window">×</button>
+                </div>
+            </div>
+            <div class="os-window-body" id="homeWindowBody"></div>
+        </div>
+        <div class="os-window settings-os-window" id="settingsWindow" data-window="settings" hidden aria-label="System settings">
+            <div class="os-titlebar" data-drag-window="settings">
+                <div class="os-window-app"><span>⚙</span><strong>System Settings</strong></div>
+                <div class="os-window-controls">
+                    <button type="button" data-minimize="settings" aria-label="Minimize window">−</button>
+                    <button type="button" data-maximize="settings" aria-label="Maximize window">□</button>
+                    <button type="button" data-close="settings" aria-label="Close window">×</button>
+                </div>
+            </div>
+            <div class="os-settings-content">
+                <p class="settings-eyebrow">PERSONALIZATION</p>
+                <h2>Make it your own. <span>❄</span></h2>
+                <p class="settings-intro">Tune your little corner of Gensokyo.</p>
+                <label class="setting-row"><span><b>Snow particles</b><small>Let ice crystals drift across the desktop</small></span><input id="settingSnow" type="checkbox" checked></label>
+                <label class="setting-row"><span><b>Glass glow</b><small>Keep the frosted-glass highlights</small></span><input id="settingGlass" type="checkbox" checked></label>
+                <label class="setting-row"><span><b>Pixel clock</b><small>Show the local time widget</small></span><input id="settingClock" type="checkbox" checked></label>
+                <div class="settings-note"><span>🦇</span><p><b>Scarlet Devil Mansion note</b><br>Settings are saved on this device when browser storage is available.</p></div>
+                <button type="button" class="os-primary-button" id="settingsDone">Looks good</button>
+            </div>
+        </div>
+        <div class="os-start-menu" id="osStartMenu" hidden>
+            <div class="start-menu-heading"><span>⑨</span><div><b>ICE FAIRY OS</b><small>Welcome back, visitor!</small></div></div>
+            <p class="start-section-label">PINNED APPS</p>
+            <button data-os-open="home"><span>❄️</span><span><b>Welcome</b><small>My little corner of Gensokyo</small></span></button>
+            <button data-os-open="music"><span>🎵</span><span><b>Music Player</b><small>Menu OST · AWFUL</small></span></button>
+            <button data-os-open="settings"><span>⚙️</span><span><b>Settings</b><small>Personalize your desktop</small></span></button>
+            <div class="start-menu-footer"><span>❄ Gensokyo session</span><span>⑨</span></div>
+        </div>
+        <footer class="os-taskbar">
+            <button type="button" id="osStartButton" class="os-start-button" aria-expanded="false"><span>❄</span><b>Start</b></button>
+            <div class="taskbar-divider"></div>
+            <button type="button" class="taskbar-app active" data-restore="home"><span>❄</span><b>Welcome</b></button>
+            <button type="button" class="taskbar-app" data-restore="settings" id="settingsTaskbar" hidden><span>⚙</span><b>Settings</b></button>
+            <div class="taskbar-spacer"></div>
+            <div class="taskbar-status"><span class="status-dot"></span><span>GENSOKYO ONLINE</span></div>
+            <div class="taskbar-clock"><b id="taskbarTime">00:00</b><small id="taskbarDate">----</small></div>
+        </footer>
+    </div>
 
     <!-- Local pixel clock -->
     <aside class="pixel-clock" id="pixelClock" aria-label="Local time clock">
