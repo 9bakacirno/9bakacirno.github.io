@@ -1588,3 +1588,44 @@ footer {
         right: auto !important;
     }
 }
+
+
+/* Independent droplet widgets: each owns its own panel and drag position. */
+.menu-widget { z-index: 1001; }
+.awful-widget { z-index: 1002; }
+.music-widget .music-panel.panel {
+    position: absolute !important;
+    top: 50% !important;
+    bottom: auto !important;
+    right: 66px !important;
+    left: auto !important;
+    transform: translateY(-50%) !important;
+}
+.music-widget.docked-left .music-panel.panel { left: 66px !important; right: auto !important; }
+.music-widget .awful-version-controls { margin: 10px 0; }
+.music-widget .awful-version-controls .version-button { min-width: 86px; }
+.music-widget .lyrics-panel {
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px solid rgba(142, 234, 255, .18);
+    border-radius: 12px;
+    background: rgba(142, 234, 255, .035);
+}
+.music-widget .lyrics-heading {
+    margin: 0 0 10px;
+    color: var(--ice, #a9e7ff);
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+#awfulLyricsDisplay {
+    max-height: 170px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(142, 234, 255, .45) transparent;
+}
+#awfulLyricsDisplay .lyric-line { margin: 7px 0; font-size: 12px; opacity: .58; transition: opacity .2s, color .2s; }
+#awfulLyricsDisplay .lyric-line.active { opacity: 1; color: #d8f8ff; text-shadow: 0 0 10px rgba(142, 234, 255, .35); }
+@media (max-width: 650px) {
+    .music-widget .music-panel.panel { right: 56px !important; left: auto !important; width: min(300px, calc(100vw - 78px)); }
+    .music-widget.docked-left .music-panel.panel { left: 56px !important; right: auto !important; }
+}
