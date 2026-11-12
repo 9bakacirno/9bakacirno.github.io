@@ -1492,3 +1492,71 @@ footer {
     .pixel-clock-top { margin-bottom: 8px; gap: 8px; }
     .clock-light-toggle { width: 22px; height: 22px; }
 }
+
+
+/* =========================
+   DUAL MUSIC PLAYER CARDS
+========================= */
+.music-panel .mini-player {
+    margin-top: 14px;
+    padding: 16px 14px 12px;
+    border: 1px solid rgba(142, 234, 255, .23);
+    border-radius: 16px;
+    background: linear-gradient(145deg, rgba(142, 234, 255, .075), rgba(9, 18, 40, .38));
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,.06);
+}
+.music-panel .mini-player:first-of-type { margin-top: 8px; }
+.music-panel .mini-player-label {
+    margin: 0 0 8px;
+    color: #a9e7ff;
+    font-size: 9px;
+    letter-spacing: 2px;
+}
+.music-panel .mini-player-title {
+    margin: 0;
+    color: #e3f8ff;
+    font-size: 15px;
+}
+.music-panel .mini-player-subtitle {
+    margin: 5px 0 12px;
+    color: rgba(220, 242, 255, .7);
+    font-size: 11px;
+}
+.music-panel .mini-player-controls { display: flex; justify-content: center; }
+.music-panel .mini-player-controls button {
+    border: 1px solid rgba(142, 234, 255, .55);
+    border-radius: 999px;
+    padding: 9px 22px;
+    color: var(--ice);
+    background: rgba(142, 234, 255, .1);
+    cursor: pointer;
+    transition: background .2s, transform .2s;
+}
+.music-panel .mini-player-controls button:hover {
+    background: rgba(142, 234, 255, .2);
+    transform: translateY(-1px);
+}
+.music-panel .mini-player-status {
+    min-height: 1em;
+    margin: 8px 0 0;
+    color: rgba(194, 237, 255, .65);
+    font-size: 10px;
+    overflow-wrap: anywhere;
+}
+.music-panel .track-label {
+    display: block;
+    margin: 10px 0 6px;
+    color: rgba(220, 242, 255, .75);
+    font-size: 11px;
+}
+.music-panel .track-select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid rgba(142, 234, 255, .3);
+    border-radius: 10px;
+    color: #e3f8ff;
+    background: #10233c;
+    font: inherit;
+    font-size: 12px;
+}
+.music-panel .track-select option { color: #e3f8ff; background: #10233c; }
