@@ -235,64 +235,59 @@
     </main>
 
 
-    <!-- Floating dual music players -->
-    <div class="music-widget">
-        <button id="musicToggle" class="music-toggle" type="button"
-                aria-expanded="false" aria-controls="musicPanel"
-                aria-label="Open music players" title="Music players">♪</button>
-
-        <section class="panel music-panel" id="musicPanel" aria-label="Music players" hidden>
+    <!-- Independent floating Menu OST player -->
+    <div class="music-widget menu-widget" data-default-top="30">
+        <button id="menuMusicToggle" class="music-toggle" type="button"
+                aria-expanded="false" aria-controls="menuMusicPanel"
+                aria-label="Open Menu OST player" title="Menu OST">❄</button>
+        <section class="panel music-panel" id="menuMusicPanel" aria-label="Menu OST player" hidden>
             <div class="music-widget-heading">
-                <div class="panel-title">
-                    <span>❄</span>
-                    <h2>Music Corner</h2>
-                    <span>♪</span>
-                </div>
-                <button id="musicClose" class="music-close" type="button" aria-label="Close music players">×</button>
+                <div class="panel-title"><span>❄</span><h2>Menu OST</h2><span>♪</span></div>
+                <button id="menuMusicClose" class="music-close" type="button" aria-label="Close Menu player">×</button>
             </div>
-
-            <!-- Dedicated Menu OST player -->
-            <section class="mini-player" aria-label="Menu soundtrack player">
+            <section class="mini-player" aria-label="Nico's Nextbots Menu soundtrack">
                 <p class="mini-player-label">❄ MENU SOUNDTRACK</p>
                 <h3 class="mini-player-title">Nico’s Nextbots OST</h3>
                 <p class="mini-player-subtitle">Menu (Holiday &amp; In-Game Version)</p>
-                <audio id="menuAudio" loop preload="metadata">
-                    <source src="menu-holiday.mp3" type="audio/mpeg">
-                </audio>
-                <div class="mini-player-controls">
-                    <button id="menuPlayButton" type="button">▶ Play</button>
-                </div>
+                <audio id="menuAudio" loop preload="metadata"><source src="menu-holiday.mp3" type="audio/mpeg"></audio>
+                <div class="mini-player-controls"><button id="menuPlayButton" type="button">▶ Play</button></div>
                 <div class="music-progress">
-                    <div class="music-time">
-                        <span id="menuCurrentTime">0:00</span>
-                        <span id="menuDuration">0:00</span>
-                    </div>
+                    <div class="music-time"><span id="menuCurrentTime">0:00</span><span id="menuDuration">0:00</span></div>
                     <input type="range" id="menuProgressBar" min="0" max="100" value="0" step="0.1" aria-label="Menu soundtrack progress">
                 </div>
                 <p id="menuStatus" class="mini-player-status">Menu OST · Ready</p>
             </section>
+        </section>
+    </div>
 
-            <!-- General music library: add more options here as the collection grows -->
-            <section class="mini-player library-player" aria-label="Other music player">
+    <!-- Independent floating AWFUL player -->
+    <div class="music-widget awful-widget" data-default-top="68">
+        <button id="awfulMusicToggle" class="music-toggle" type="button"
+                aria-expanded="false" aria-controls="awfulMusicPanel"
+                aria-label="Open AWFUL player" title="AWFUL — nicopatty">♪</button>
+        <section class="panel music-panel" id="awfulMusicPanel" aria-label="AWFUL player" hidden>
+            <div class="music-widget-heading">
+                <div class="panel-title"><span>♪</span><h2>AWFUL</h2><span>❄</span></div>
+                <button id="awfulMusicClose" class="music-close" type="button" aria-label="Close AWFUL player">×</button>
+            </div>
+            <section class="mini-player library-player" aria-label="AWFUL by nicopatty">
                 <p class="mini-player-label">♪ OTHER MUSIC</p>
-                <label class="track-label" for="libraryTrack">Choose a track</label>
-                <select id="libraryTrack" class="track-select">
-                    <option value="awful.mp3">AWFUL — nicopatty</option>
-                </select>
-                <audio id="libraryAudio" preload="metadata">
-                    <source src="awful.mp3" type="audio/mpeg">
-                </audio>
-                <div class="mini-player-controls">
-                    <button id="libraryPlayButton" type="button">▶ Play</button>
+                <h3 class="mini-player-title">AWFUL — nicopatty</h3>
+                <audio id="awfulAudio" preload="metadata"><source src="awful.mp3" type="audio/mpeg"></audio>
+                <div class="music-controls awful-version-controls">
+                    <button id="awfulNormalButton" class="version-button active" type="button">Normal</button>
+                    <button id="awfulSlowedButton" class="version-button" type="button">Slowed</button>
                 </div>
+                <div class="mini-player-controls"><button id="awfulPlayButton" type="button">▶ Play</button></div>
                 <div class="music-progress">
-                    <div class="music-time">
-                        <span id="libraryCurrentTime">0:00</span>
-                        <span id="libraryDuration">0:00</span>
-                    </div>
-                    <input type="range" id="libraryProgressBar" min="0" max="100" value="0" step="0.1" aria-label="Other music progress">
+                    <div class="music-time"><span id="awfulCurrentTime">0:00</span><span id="awfulDuration">0:00</span></div>
+                    <input type="range" id="awfulProgressBar" min="0" max="100" value="0" step="0.1" aria-label="AWFUL playback progress">
                 </div>
-                <p id="libraryStatus" class="mini-player-status">AWFUL — nicopatty · Ready</p>
+                <p id="awfulStatus" class="mini-player-status">AWFUL — nicopatty · Ready</p>
+                <div class="lyrics-panel">
+                    <p class="lyrics-heading">LYRICS · 同步歌词</p>
+                    <div id="awfulLyricsDisplay" aria-live="off"><p class="lyric-line">Loading lyrics…</p></div>
+                </div>
             </section>
         </section>
     </div>
