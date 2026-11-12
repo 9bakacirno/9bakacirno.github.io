@@ -39,24 +39,46 @@ setInterval(createParticle, 350);
    TWO INDEPENDENT MUSIC PLAYERS
 ========================= */
 
-function setupWidgetPanel(toggleId, panelId, closeId) {
-    const toggle = document.getElementById(toggleId);
-    const panel = document.getElementById(panelId);
-    const close = document.getElementById(closeId);
-    function setOpen(open) {
-        if (!toggle || !panel) return;
-        panel.hidden = !open;
-        toggle.setAttribute("aria-expanded", String(open));
-        toggle.classList.toggle("is-open", open);
+/* One droplet toggles both windows; each × closes only its own window. */
+(() => {
+    const toggle = document.getElementById("musicToggle");
+    const menuPanel = document.getElementById("menuMusicPanel");
+    const awfulPanel = document.getElementById("awfulMusicPanel");
+    const menuClose = document.getElementById("menuMusicClose");
+    const awfulClose = document.getElementById("awfulMusicClose");
+    if (!toggle || !menuPanel || !awfulPanel) return;
+
+    function syncToggleState() {
+        const anyOpen = !menuPanel.hidden || !awfulPanel.hidden;
+        toggle.setAttribute("aria-expanded", String(anyOpen));
+        toggle.classList.toggle("is-open", anyOpen);
     }
-    if (toggle && panel) toggle.addEventListener("click", () => setOpen(panel.hidden));
-    if (close) close.addEventListener("click", () => setOpen(false));
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && panel && !panel.hidden) setOpen(false);
+    function closeBoth() {
+        menuPanel.hidden = true;
+        awfulPanel.hidden = true;
+        syncToggleState();
+    }
+    toggle.addEventListener("click", () => {
+        const bothOpen = !menuPanel.hidden && !awfulPanel.hidden;
+        if (bothOpen) closeBoth();
+        else {
+            menuPanel.hidden = false;
+            awfulPanel.hidden = false;
+            syncToggleState();
+        }
     });
-}
-setupWidgetPanel("menuMusicToggle", "menuMusicPanel", "menuMusicClose");
-setupWidgetPanel("awfulMusicToggle", "awfulMusicPanel", "awfulMusicClose");
+    if (menuClose) menuClose.addEventListener("click", () => {
+        menuPanel.hidden = true;
+        syncToggleState();
+    });
+    if (awfulClose) awfulClose.addEventListener("click", () => {
+        awfulPanel.hidden = true;
+        syncToggleState();
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeBoth();
+    });
+})();
 
 function formatMusicTime(seconds) {
     if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
@@ -358,101 +380,101 @@ setInterval(() => {
 
 
 /* =========================
-   DRAG EACH MUSIC DROPLET INDEPENDENTLY
+   DRAG THE SHARED MUSIC DROPLET
+   Both windows are children of this widget, so they move together.
 ========================= */
 (() => {
-    document.querySelectorAll(".music-widget").forEach((widget, index) => {
-        const handle = widget.querySelector(".music-toggle");
-        const heading = widget.querySelector(".music-widget-heading");
-        if (!handle) return;
-        const storageKey = "cirnoMusicWidgetPosition:" + (widget.classList.contains("awful-widget") ? "awful" : "menu");
-        let drag = null;
-        let suppressClick = false;
-        const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+    const widget = document.querySelector(".shared-music-widget");
+    if (!widget) return;
+    const handle = widget.querySelector(".music-toggle");
+    const heading = widget.querySelector(".music-widget-heading");
+    if (!handle) return;
 
-        function applyPosition(left, top, dock = null) {
-            const maxLeft = Math.max(0, window.innerWidth - widget.offsetWidth);
-            const maxTop = Math.max(8, window.innerHeight - widget.offsetHeight - 8);
-            left = clamp(left, 0, maxLeft);
-            top = clamp(top, 8, maxTop);
-            const dockLeft = dock === "left" ? -22 : dock === "right" ? window.innerWidth - widget.offsetWidth + 22 : left;
-            widget.style.left = clamp(dockLeft, dock ? -22 : 0, dock ? window.innerWidth - widget.offsetWidth + 22 : maxLeft) + "px";
-            widget.style.right = "auto";
-            widget.style.top = top + "px";
-            widget.style.transform = "none";
-            widget.classList.toggle("docked-left", dock === "left");
-            widget.classList.toggle("docked-right", dock === "right");
-            try {
-                localStorage.setItem(storageKey, JSON.stringify({ left: dock === "left" ? 0 : maxLeft, top, dock: dock || "right" }));
-            } catch (_) {}
+    const storageKey = "cirnoMusicWidgetPosition:shared";
+    let drag = null;
+    let suppressClick = false;
+    const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+
+    function applyPosition(left, top, dock = null) {
+        const maxLeft = Math.max(0, window.innerWidth - widget.offsetWidth);
+        const maxTop = Math.max(8, window.innerHeight - widget.offsetHeight - 8);
+        left = clamp(left, 0, maxLeft);
+        top = clamp(top, 8, maxTop);
+        const dockLeft = dock === "left" ? -22 : dock === "right" ? window.innerWidth - widget.offsetWidth + 22 : left;
+        widget.style.left = clamp(dockLeft, dock ? -22 : 0, dock ? window.innerWidth - widget.offsetWidth + 22 : maxLeft) + "px";
+        widget.style.right = "auto";
+        widget.style.top = top + "px";
+        widget.style.transform = "none";
+        widget.classList.toggle("docked-left", dock === "left");
+        widget.classList.toggle("docked-right", dock === "right");
+        try {
+            localStorage.setItem(storageKey, JSON.stringify({ left: dock === "left" ? 0 : maxLeft, top, dock: dock || "right" }));
+        } catch (_) {}
+    }
+    function restorePosition() {
+        let saved = null;
+        try { saved = JSON.parse(localStorage.getItem(storageKey) || "null"); } catch (_) {}
+        if (saved && Number.isFinite(saved.top)) {
+            applyPosition(saved.left || 0, saved.top, saved.dock === "left" ? "left" : "right");
+        } else {
+            const defaultTop = Number(widget.dataset.defaultTop || 50) / 100 * window.innerHeight;
+            applyPosition(window.innerWidth - widget.offsetWidth, defaultTop, "right");
         }
-        function restorePosition() {
-            let saved = null;
-            try { saved = JSON.parse(localStorage.getItem(storageKey) || "null"); } catch (_) {}
-            if (saved && Number.isFinite(saved.top)) {
-                applyPosition(saved.left || 0, saved.top, saved.dock === "left" ? "left" : "right");
-            } else {
-                const defaultTop = Number(widget.dataset.defaultTop || (index === 0 ? 30 : 68)) / 100 * window.innerHeight;
-                applyPosition(window.innerWidth - widget.offsetWidth, defaultTop, "right");
-            }
+    }
+    function startDrag(event, source) {
+        if (event.button !== undefined && event.button !== 0) return;
+        if (source === heading && event.target.closest("button")) return;
+        const rect = widget.getBoundingClientRect();
+        drag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, left: rect.left, top: rect.top, moved: false };
+        if (source.setPointerCapture && event.pointerId !== undefined) {
+            try { source.setPointerCapture(event.pointerId); } catch (_) {}
         }
-        function startDrag(event, source) {
-            if (event.button !== undefined && event.button !== 0) return;
-            if (event.target.closest("button") && source === heading && event.target !== heading) return;
-            const rect = widget.getBoundingClientRect();
-            drag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, left: rect.left, top: rect.top, moved: false };
+        /* Do not preventDefault on pointerdown: a simple tap must still click the droplet. */
+    }
+    function moveDrag(event) {
+        if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
+        const dx = event.clientX - drag.startX;
+        const dy = event.clientY - drag.startY;
+        if (Math.abs(dx) + Math.abs(dy) > 5) drag.moved = true;
+        if (!drag.moved) return;
+        event.preventDefault();
+        const maxLeft = Math.max(0, window.innerWidth - widget.offsetWidth);
+        const maxTop = Math.max(8, window.innerHeight - widget.offsetHeight - 8);
+        widget.style.left = clamp(drag.left + dx, 0, maxLeft) + "px";
+        widget.style.right = "auto";
+        widget.style.top = clamp(drag.top + dy, 8, maxTop) + "px";
+        widget.style.transform = "none";
+        widget.classList.remove("docked-left", "docked-right");
+    }
+    function endDrag(event) {
+        if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
+        const moved = drag.moved;
+        const rect = widget.getBoundingClientRect();
+        const dock = rect.left + rect.width / 2 < window.innerWidth / 2 ? "left" : "right";
+        const top = clamp(rect.top, 8, window.innerHeight - widget.offsetHeight - 8);
+        drag = null;
+        if (moved) {
             widget.classList.add("is-dragging");
-            if (source.setPointerCapture && event.pointerId !== undefined) {
-                try { source.setPointerCapture(event.pointerId); } catch (_) {}
-            }
-            event.preventDefault();
-        }
-        function moveDrag(event) {
-            if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
-            const dx = event.clientX - drag.startX;
-            const dy = event.clientY - drag.startY;
-            if (Math.abs(dx) + Math.abs(dy) > 5) drag.moved = true;
-            if (!drag.moved) return;
-            const maxLeft = Math.max(0, window.innerWidth - widget.offsetWidth);
-            const maxTop = Math.max(8, window.innerHeight - widget.offsetHeight - 8);
-            widget.style.left = clamp(drag.left + dx, 0, maxLeft) + "px";
-            widget.style.right = "auto";
-            widget.style.top = clamp(drag.top + dy, 8, maxTop) + "px";
-            widget.style.transform = "none";
-            widget.classList.remove("docked-left", "docked-right");
-        }
-        function endDrag(event) {
-            if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
-            const moved = drag.moved;
-            const rect = widget.getBoundingClientRect();
-            const dock = rect.left + rect.width / 2 < window.innerWidth / 2 ? "left" : "right";
-            const top = clamp(rect.top, 8, window.innerHeight - widget.offsetHeight - 8);
-            drag = null;
+            applyPosition(dock === "left" ? 0 : window.innerWidth - widget.offsetWidth, top, dock);
             widget.classList.remove("is-dragging");
-            if (moved) {
-                applyPosition(dock === "left" ? 0 : window.innerWidth - widget.offsetWidth, top, dock);
-                suppressClick = true;
-                window.setTimeout(() => { suppressClick = false; }, 180);
-            }
+            suppressClick = true;
+            window.setTimeout(() => { suppressClick = false; }, 180);
         }
-        handle.addEventListener("pointerdown", event => startDrag(event, handle));
-        if (heading) heading.addEventListener("pointerdown", event => {
-            if (event.target.closest("button")) return;
-            startDrag(event, heading);
-        });
-        window.addEventListener("pointermove", moveDrag);
-        window.addEventListener("pointerup", endDrag);
-        window.addEventListener("pointercancel", endDrag);
-        handle.addEventListener("click", event => {
-            if (suppressClick) { event.preventDefault(); event.stopImmediatePropagation(); }
-        }, true);
-        window.addEventListener("resize", () => {
-            const rect = widget.getBoundingClientRect();
-            const dock = widget.classList.contains("docked-left") ? "left" : "right";
-            applyPosition(dock === "left" ? 0 : window.innerWidth - widget.offsetWidth, rect.top, dock);
-        });
-        restorePosition();
+    }
+    handle.addEventListener("pointerdown", event => startDrag(event, handle));
+    if (heading) heading.addEventListener("pointerdown", event => startDrag(event, heading));
+    window.addEventListener("pointermove", moveDrag, { passive: false });
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
+    handle.addEventListener("click", event => {
+        if (suppressClick) { event.preventDefault(); event.stopImmediatePropagation(); }
+    }, true);
+    window.addEventListener("resize", () => {
+        const rect = widget.getBoundingClientRect();
+        const dock = widget.classList.contains("docked-left") ? "left" : "right";
+        applyPosition(dock === "left" ? 0 : window.innerWidth - widget.offsetWidth, rect.top, dock);
     });
+    restorePosition();
 })();
 
 
