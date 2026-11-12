@@ -1561,3 +1561,30 @@ footer {
     font-size: 12px;
 }
 .music-panel .track-select option { color: #e3f8ff; background: #10233c; }
+
+
+/* Keep the open music panel physically attached to the draggable droplet.
+   This final override wins over earlier generic panel positioning rules. */
+.music-widget .music-panel.panel {
+    position: absolute !important;
+    top: 50% !important;
+    bottom: auto !important;
+    right: 66px !important;
+    left: auto !important;
+    transform: translateY(-50%) !important;
+}
+.music-widget.docked-left .music-panel.panel {
+    left: 66px !important;
+    right: auto !important;
+}
+@media (max-width: 650px) {
+    .music-widget .music-panel.panel {
+        right: 56px !important;
+        left: auto !important;
+        width: min(300px, calc(100vw - 78px));
+    }
+    .music-widget.docked-left .music-panel.panel {
+        left: 56px !important;
+        right: auto !important;
+    }
+}
