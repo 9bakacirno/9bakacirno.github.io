@@ -36,56 +36,49 @@ setInterval(createParticle, 350);
 
 
 /* =========================
-   DUAL MUSIC PLAYERS
+   TWO INDEPENDENT MUSIC PLAYERS
 ========================= */
 
-const musicToggle = document.getElementById("musicToggle");
-const musicPanel = document.getElementById("musicPanel");
-const musicClose = document.getElementById("musicClose");
-
-function setMusicPanelOpen(open) {
-    if (!musicPanel || !musicToggle) return;
-    musicPanel.hidden = !open;
-    musicToggle.setAttribute("aria-expanded", String(open));
-    musicToggle.setAttribute("aria-label", open ? "Close music players" : "Open music players");
-    musicToggle.classList.toggle("is-open", open);
-}
-
-if (musicToggle && musicPanel) {
-    musicToggle.addEventListener("click", () => setMusicPanelOpen(musicPanel.hidden));
-}
-if (musicClose) {
-    musicClose.addEventListener("click", () => setMusicPanelOpen(false));
-}
-document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && musicPanel && !musicPanel.hidden) {
-        setMusicPanelOpen(false);
+function setupWidgetPanel(toggleId, panelId, closeId) {
+    const toggle = document.getElementById(toggleId);
+    const panel = document.getElementById(panelId);
+    const close = document.getElementById(closeId);
+    function setOpen(open) {
+        if (!toggle || !panel) return;
+        panel.hidden = !open;
+        toggle.setAttribute("aria-expanded", String(open));
+        toggle.classList.toggle("is-open", open);
     }
-});
+    if (toggle && panel) toggle.addEventListener("click", () => setOpen(panel.hidden));
+    if (close) close.addEventListener("click", () => setOpen(false));
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && panel && !panel.hidden) setOpen(false);
+    });
+}
+setupWidgetPanel("menuMusicToggle", "menuMusicPanel", "menuMusicClose");
+setupWidgetPanel("awfulMusicToggle", "awfulMusicPanel", "awfulMusicClose");
 
 function formatMusicTime(seconds) {
     if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
     return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 }
 
-function setupMusicPlayer(config) {
+function setupAudioControls(config) {
     const audio = document.getElementById(config.audioId);
     const button = document.getElementById(config.buttonId);
     const progress = document.getElementById(config.progressId);
     const currentTime = document.getElementById(config.currentTimeId);
     const duration = document.getElementById(config.durationId);
     const status = document.getElementById(config.statusId);
-
     if (!audio || !button) return null;
 
     function updateButton() {
         button.textContent = audio.paused ? "▶ Play" : "⏸ Pause";
     }
-
     function updateProgress() {
         const total = audio.duration;
         if (Number.isFinite(total) && total > 0) {
-            if (progress) progress.value = (audio.currentTime / total) * 100;
+            if (progress) progress.value = audio.currentTime / total * 100;
             if (currentTime) currentTime.textContent = formatMusicTime(audio.currentTime);
             if (duration) duration.textContent = formatMusicTime(total);
         } else {
@@ -94,51 +87,33 @@ function setupMusicPlayer(config) {
             if (duration) duration.textContent = "0:00";
         }
     }
-
     button.addEventListener("click", async () => {
-        // Avoid both players playing over each other.
-        document.querySelectorAll(".independent-audio").forEach((other) => {
-            if (other !== audio) other.pause();
-        });
         if (audio.paused) {
-            try {
-                await audio.play();
-            } catch (error) {
-                if (status) status.textContent = "Playback blocked or audio file unavailable — click Play again.";
-            }
-        } else {
-            audio.pause();
-        }
+            try { await audio.play(); }
+            catch (_) { if (status) status.textContent = "Playback blocked or audio file unavailable — click Play again."; }
+        } else audio.pause();
         updateButton();
     });
-
     audio.addEventListener("play", () => {
-        document.querySelectorAll(".independent-audio").forEach((other) => {
-            if (other !== audio) other.pause();
-        });
         updateButton();
         if (status) status.textContent = config.playingText;
     });
     audio.addEventListener("pause", updateButton);
     audio.addEventListener("ended", updateButton);
-    audio.addEventListener("timeupdate", updateProgress);
-    audio.addEventListener("loadedmetadata", updateProgress);
+    audio.addEventListener("timeupdate", () => { updateProgress(); if (config.onTimeUpdate) config.onTimeUpdate(); });
+    audio.addEventListener("loadedmetadata", () => { updateProgress(); if (config.onTimeUpdate) config.onTimeUpdate(); });
     audio.addEventListener("durationchange", updateProgress);
-
-    if (progress) {
-        progress.addEventListener("input", () => {
-            if (Number.isFinite(audio.duration) && audio.duration > 0) {
-                audio.currentTime = (Number(progress.value) / 100) * audio.duration;
-                updateProgress();
-            }
-        });
-    }
-
-    audio.classList.add("independent-audio");
+    if (progress) progress.addEventListener("input", () => {
+        if (Number.isFinite(audio.duration) && audio.duration > 0) {
+            audio.currentTime = Number(progress.value) / 100 * audio.duration;
+            updateProgress();
+            if (config.onTimeUpdate) config.onTimeUpdate();
+        }
+    });
     return { audio, updateButton, updateProgress };
 }
 
-const menuPlayer = setupMusicPlayer({
+const menuPlayer = setupAudioControls({
     audioId: "menuAudio",
     buttonId: "menuPlayButton",
     progressId: "menuProgressBar",
@@ -148,45 +123,127 @@ const menuPlayer = setupMusicPlayer({
     playingText: "♪ Playing Menu OST"
 });
 
-const libraryAudio = document.getElementById("libraryAudio");
-const libraryTrack = document.getElementById("libraryTrack");
-const libraryStatus = document.getElementById("libraryStatus");
+/* AWFUL: restore normal/slowed versions and synchronized .lrc lyrics. */
+const awfulAudioElement = document.getElementById("awfulAudio");
+const awfulStatus = document.getElementById("awfulStatus");
+const awfulLyricsDisplay = document.getElementById("awfulLyricsDisplay");
+const awfulNormalButton = document.getElementById("awfulNormalButton");
+const awfulSlowedButton = document.getElementById("awfulSlowedButton");
+let awfulVersion = "normal";
+let awfulLyricLines = [];
+let awfulLyricElements = [];
+let awfulNormalDuration = 136;
 
-const libraryPlayer = setupMusicPlayer({
-    audioId: "libraryAudio",
-    buttonId: "libraryPlayButton",
-    progressId: "libraryProgressBar",
-    currentTimeId: "libraryCurrentTime",
-    durationId: "libraryDuration",
-    statusId: "libraryStatus",
-    playingText: "♪ Playing selected track"
-});
-
-// Future songs can be added as <option value="filename.mp3">Song — Artist</option>
-// in index.html. Changing the selection updates only the Other Music player.
-if (libraryTrack && libraryAudio) {
-    libraryTrack.addEventListener("change", () => {
-        const wasPlaying = !libraryAudio.paused;
-        libraryAudio.pause();
-        libraryAudio.src = libraryTrack.value;
-        libraryAudio.load();
-        const selectedLabel = libraryTrack.options[libraryTrack.selectedIndex]?.text || "Selected track";
-        if (libraryStatus) libraryStatus.textContent = selectedLabel + " · Ready";
-        const currentTime = document.getElementById("libraryCurrentTime");
-        const duration = document.getElementById("libraryDuration");
-        const progress = document.getElementById("libraryProgressBar");
-        if (currentTime) currentTime.textContent = "0:00";
-        if (duration) duration.textContent = "0:00";
-        if (progress) progress.value = 0;
-        if (wasPlaying) {
-            libraryAudio.play().catch(() => {
-                if (libraryStatus) libraryStatus.textContent = "Click Play to start this track.";
-            });
+function parseAwfulLrc(text) {
+    const lines = [];
+    for (const line of text.split(/\r?\n/)) {
+        const matches = [...line.matchAll(/\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g)];
+        if (!matches.length) continue;
+        const lyric = line.replace(/\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g, "").trim();
+        for (const match of matches) {
+            const fraction = (match[3] || "0").padEnd(3, "0");
+            lines.push({ time: Number(match[1]) * 60 + Number(match[2]) + Number(fraction) / 1000, text: lyric });
         }
+    }
+    return lines.sort((a, b) => a.time - b.time);
+}
+function renderAwfulLyrics() {
+    if (!awfulLyricsDisplay) return;
+    awfulLyricsDisplay.replaceChildren();
+    awfulLyricElements = [];
+    if (!awfulLyricLines.length) {
+        const p = document.createElement("p");
+        p.className = "lyric-line";
+        p.textContent = "No lyrics found.";
+        awfulLyricsDisplay.appendChild(p);
+        return;
+    }
+    awfulLyricLines.forEach((line) => {
+        const p = document.createElement("p");
+        p.className = "lyric-line";
+        p.textContent = line.text || "♪";
+        awfulLyricsDisplay.appendChild(p);
+        awfulLyricElements.push(p);
+    });
+    updateAwfulLyrics();
+}
+function updateAwfulLyrics() {
+    if (!awfulAudioElement || !awfulLyricsDisplay || !awfulLyricLines.length) return;
+    if (awfulVersion === "normal" && Number.isFinite(awfulAudioElement.duration) && awfulAudioElement.duration > 0) {
+        awfulNormalDuration = awfulAudioElement.duration;
+    }
+    let lyricTime = awfulAudioElement.currentTime;
+    if (awfulVersion === "slowed" && Number.isFinite(awfulAudioElement.duration) && awfulAudioElement.duration > 0 && awfulNormalDuration > 0) {
+        lyricTime *= awfulNormalDuration / awfulAudioElement.duration;
+    }
+    let active = -1;
+    for (let i = 0; i < awfulLyricLines.length; i++) {
+        if (awfulLyricLines[i].time <= lyricTime) active = i;
+        else break;
+    }
+    awfulLyricElements.forEach((el) => el.classList.remove("active"));
+    if (active >= 0 && awfulLyricElements[active]) {
+        const el = awfulLyricElements[active];
+        el.classList.add("active");
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+}
+if (awfulLyricsDisplay) {
+    fetch("awful.lrc").then((response) => {
+        if (!response.ok) throw new Error("Could not load awful.lrc");
+        return response.text();
+    }).then((text) => {
+        awfulLyricLines = parseAwfulLrc(text);
+        renderAwfulLyrics();
+    }).catch((error) => {
+        awfulLyricsDisplay.textContent = "Lyrics unavailable.";
+        console.error("AWFUL lyrics loading failed:", error);
     });
 }
 
-// Attempt autoplay for the dedicated Menu player. Browsers may block audible autoplay.
+const awfulPlayer = setupAudioControls({
+    audioId: "awfulAudio",
+    buttonId: "awfulPlayButton",
+    progressId: "awfulProgressBar",
+    currentTimeId: "awfulCurrentTime",
+    durationId: "awfulDuration",
+    statusId: "awfulStatus",
+    playingText: "♪ Playing AWFUL — nicopatty",
+    onTimeUpdate: updateAwfulLyrics
+});
+
+async function setAwfulVersion(version) {
+    if (!awfulAudioElement || version === awfulVersion) return;
+    const wasPlaying = !awfulAudioElement.paused;
+    const oldDuration = awfulAudioElement.duration;
+    const oldTime = awfulAudioElement.currentTime;
+    const ratio = Number.isFinite(oldDuration) && oldDuration > 0 ? oldTime / oldDuration : 0;
+    awfulVersion = version;
+    awfulAudioElement.pause();
+    awfulAudioElement.src = version === "slowed" ? "awful-slowed.mp3" : "awful.mp3";
+    awfulAudioElement.load();
+    awfulAudioElement.addEventListener("loadedmetadata", async function restorePosition() {
+        awfulAudioElement.removeEventListener("loadedmetadata", restorePosition);
+        if (Number.isFinite(awfulAudioElement.duration) && awfulAudioElement.duration > 0) {
+            awfulAudioElement.currentTime = ratio * awfulAudioElement.duration;
+        }
+        if (awfulNormalButton) awfulNormalButton.classList.toggle("active", version === "normal");
+        if (awfulSlowedButton) awfulSlowedButton.classList.toggle("active", version === "slowed");
+        if (awfulStatus) awfulStatus.textContent = version === "slowed" ? "AWFUL — nicopatty · Slowed" : "AWFUL — nicopatty · Normal";
+        if (awfulPlayer) awfulPlayer.updateProgress();
+        updateAwfulLyrics();
+        if (wasPlaying) {
+            try { await awfulAudioElement.play(); }
+            catch (_) { if (awfulStatus) awfulStatus.textContent = "Click Play to resume AWFUL."; }
+        }
+    }, { once: true });
+    if (awfulNormalButton) awfulNormalButton.classList.toggle("active", version === "normal");
+    if (awfulSlowedButton) awfulSlowedButton.classList.toggle("active", version === "slowed");
+}
+if (awfulNormalButton) awfulNormalButton.addEventListener("click", () => setAwfulVersion("normal"));
+if (awfulSlowedButton) awfulSlowedButton.addEventListener("click", () => setAwfulVersion("slowed"));
+
+/* Try Menu autoplay only; browsers may block audible autoplay. */
 if (menuPlayer) {
     menuPlayer.audio.play().catch(() => {
         const status = document.getElementById("menuStatus");
@@ -301,127 +358,101 @@ setInterval(() => {
 
 
 /* =========================
-   DRAG / EDGE DOCK MUSIC WIDGET
+   DRAG EACH MUSIC DROPLET INDEPENDENTLY
 ========================= */
 (() => {
-    const widget = document.querySelector(".music-widget");
-    const handle = document.getElementById("musicToggle");
-    const heading = document.querySelector(".music-widget-heading");
-    if (!widget || !handle) return;
+    document.querySelectorAll(".music-widget").forEach((widget, index) => {
+        const handle = widget.querySelector(".music-toggle");
+        const heading = widget.querySelector(".music-widget-heading");
+        if (!handle) return;
+        const storageKey = "cirnoMusicWidgetPosition:" + (widget.classList.contains("awful-widget") ? "awful" : "menu");
+        let drag = null;
+        let suppressClick = false;
+        const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 
-    const STORAGE_KEY = "cirnoMusicWidgetPosition";
-    let drag = null;
-    let suppressClick = false;
-
-    function clamp(value, min, max) {
-        return Math.min(Math.max(value, min), max);
-    }
-
-    function applyPosition(left, top, dock = null) {
-        const maxLeft = Math.max(0, window.innerWidth - widget.offsetWidth);
-        const maxTop = Math.max(8, window.innerHeight - widget.offsetHeight - 8);
-        left = clamp(left, 0, maxLeft);
-        top = clamp(top, 8, maxTop);
-        // Animate a single numeric left position; transitioning between
-        // left/right and auto cannot interpolate smoothly in CSS.
-        const dockLeft = dock === "left" ? -22 : dock === "right" ? window.innerWidth - widget.offsetWidth + 22 : left;
-        widget.style.left = clamp(dockLeft, dock ? -22 : 0, dock ? window.innerWidth - widget.offsetWidth + 22 : maxLeft) + "px";
-        widget.style.right = "auto";
-        widget.style.top = top + "px";
-        widget.style.transform = "none";
-        widget.classList.toggle("docked-left", dock === "left");
-        widget.classList.toggle("docked-right", dock === "right");
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                left: dock === "left" ? 0 : maxLeft,
-                top,
-                dock: dock || "right"
-            }));
-        } catch (_) {}
-    }
-
-    function restorePosition() {
-        let saved = null;
-        try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch (_) {}
-        if (saved && Number.isFinite(saved.top)) {
-            applyPosition(saved.left || 0, saved.top, saved.dock === "left" ? "left" : "right");
-        } else {
-            applyPosition(window.innerWidth - widget.offsetWidth, window.innerHeight / 2 - widget.offsetHeight / 2, "right");
+        function applyPosition(left, top, dock = null) {
+            const maxLeft = Math.max(0, window.innerWidth - widget.offsetWidth);
+            const maxTop = Math.max(8, window.innerHeight - widget.offsetHeight - 8);
+            left = clamp(left, 0, maxLeft);
+            top = clamp(top, 8, maxTop);
+            const dockLeft = dock === "left" ? -22 : dock === "right" ? window.innerWidth - widget.offsetWidth + 22 : left;
+            widget.style.left = clamp(dockLeft, dock ? -22 : 0, dock ? window.innerWidth - widget.offsetWidth + 22 : maxLeft) + "px";
+            widget.style.right = "auto";
+            widget.style.top = top + "px";
+            widget.style.transform = "none";
+            widget.classList.toggle("docked-left", dock === "left");
+            widget.classList.toggle("docked-right", dock === "right");
+            try {
+                localStorage.setItem(storageKey, JSON.stringify({ left: dock === "left" ? 0 : maxLeft, top, dock: dock || "right" }));
+            } catch (_) {}
         }
-    }
-
-    function startDrag(event, source) {
-        if (event.button !== undefined && event.button !== 0) return;
-        if (event.target.closest("button") && source === heading && event.target !== heading) return;
-        const rect = widget.getBoundingClientRect();
-        drag = {
-            pointerId: event.pointerId,
-            startX: event.clientX,
-            startY: event.clientY,
-            left: rect.left,
-            top: rect.top,
-            moved: false
-        };
-        widget.classList.add("is-dragging");
-        if (source.setPointerCapture && event.pointerId !== undefined) {
-            try { source.setPointerCapture(event.pointerId); } catch (_) {}
+        function restorePosition() {
+            let saved = null;
+            try { saved = JSON.parse(localStorage.getItem(storageKey) || "null"); } catch (_) {}
+            if (saved && Number.isFinite(saved.top)) {
+                applyPosition(saved.left || 0, saved.top, saved.dock === "left" ? "left" : "right");
+            } else {
+                const defaultTop = Number(widget.dataset.defaultTop || (index === 0 ? 30 : 68)) / 100 * window.innerHeight;
+                applyPosition(window.innerWidth - widget.offsetWidth, defaultTop, "right");
+            }
         }
-        event.preventDefault();
-    }
-
-    function moveDrag(event) {
-        if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
-        const dx = event.clientX - drag.startX;
-        const dy = event.clientY - drag.startY;
-        if (Math.abs(dx) + Math.abs(dy) > 5) drag.moved = true;
-        if (!drag.moved) return;
-        const maxLeft = Math.max(0, window.innerWidth - widget.offsetWidth);
-        const maxTop = Math.max(8, window.innerHeight - widget.offsetHeight - 8);
-        widget.style.left = clamp(drag.left + dx, 0, maxLeft) + "px";
-        widget.style.right = "auto";
-        widget.style.top = clamp(drag.top + dy, 8, maxTop) + "px";
-        widget.style.transform = "none";
-        widget.classList.remove("docked-left", "docked-right");
-    }
-
-    function endDrag(event) {
-        if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
-        const moved = drag.moved;
-        const rect = widget.getBoundingClientRect();
-        const dock = rect.left + rect.width / 2 < window.innerWidth / 2 ? "left" : "right";
-        const top = clamp(rect.top, 8, window.innerHeight - widget.offsetHeight - 8);
-        drag = null;
-        widget.classList.remove("is-dragging");
-        if (moved) {
-            applyPosition(dock === "left" ? 0 : window.innerWidth - widget.offsetWidth, top, dock);
-            suppressClick = true;
-            window.setTimeout(() => { suppressClick = false; }, 180);
-        }
-    }
-
-    handle.addEventListener("pointerdown", event => startDrag(event, handle));
-    if (heading) heading.addEventListener("pointerdown", event => {
-        if (event.target.closest("button")) return;
-        startDrag(event, heading);
-    });
-    window.addEventListener("pointermove", moveDrag);
-    window.addEventListener("pointerup", endDrag);
-    window.addEventListener("pointercancel", endDrag);
-
-    handle.addEventListener("click", event => {
-        if (suppressClick) {
+        function startDrag(event, source) {
+            if (event.button !== undefined && event.button !== 0) return;
+            if (event.target.closest("button") && source === heading && event.target !== heading) return;
+            const rect = widget.getBoundingClientRect();
+            drag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, left: rect.left, top: rect.top, moved: false };
+            widget.classList.add("is-dragging");
+            if (source.setPointerCapture && event.pointerId !== undefined) {
+                try { source.setPointerCapture(event.pointerId); } catch (_) {}
+            }
             event.preventDefault();
-            event.stopImmediatePropagation();
         }
-    }, true);
-
-    window.addEventListener("resize", () => {
-        const rect = widget.getBoundingClientRect();
-        const dock = widget.classList.contains("docked-left") ? "left" : "right";
-        applyPosition(dock === "left" ? 0 : window.innerWidth - widget.offsetWidth, rect.top, dock);
+        function moveDrag(event) {
+            if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
+            const dx = event.clientX - drag.startX;
+            const dy = event.clientY - drag.startY;
+            if (Math.abs(dx) + Math.abs(dy) > 5) drag.moved = true;
+            if (!drag.moved) return;
+            const maxLeft = Math.max(0, window.innerWidth - widget.offsetWidth);
+            const maxTop = Math.max(8, window.innerHeight - widget.offsetHeight - 8);
+            widget.style.left = clamp(drag.left + dx, 0, maxLeft) + "px";
+            widget.style.right = "auto";
+            widget.style.top = clamp(drag.top + dy, 8, maxTop) + "px";
+            widget.style.transform = "none";
+            widget.classList.remove("docked-left", "docked-right");
+        }
+        function endDrag(event) {
+            if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
+            const moved = drag.moved;
+            const rect = widget.getBoundingClientRect();
+            const dock = rect.left + rect.width / 2 < window.innerWidth / 2 ? "left" : "right";
+            const top = clamp(rect.top, 8, window.innerHeight - widget.offsetHeight - 8);
+            drag = null;
+            widget.classList.remove("is-dragging");
+            if (moved) {
+                applyPosition(dock === "left" ? 0 : window.innerWidth - widget.offsetWidth, top, dock);
+                suppressClick = true;
+                window.setTimeout(() => { suppressClick = false; }, 180);
+            }
+        }
+        handle.addEventListener("pointerdown", event => startDrag(event, handle));
+        if (heading) heading.addEventListener("pointerdown", event => {
+            if (event.target.closest("button")) return;
+            startDrag(event, heading);
+        });
+        window.addEventListener("pointermove", moveDrag);
+        window.addEventListener("pointerup", endDrag);
+        window.addEventListener("pointercancel", endDrag);
+        handle.addEventListener("click", event => {
+            if (suppressClick) { event.preventDefault(); event.stopImmediatePropagation(); }
+        }, true);
+        window.addEventListener("resize", () => {
+            const rect = widget.getBoundingClientRect();
+            const dock = widget.classList.contains("docked-left") ? "left" : "right";
+            applyPosition(dock === "left" ? 0 : window.innerWidth - widget.offsetWidth, rect.top, dock);
+        });
+        restorePosition();
     });
-
-    restorePosition();
 })();
 
 
