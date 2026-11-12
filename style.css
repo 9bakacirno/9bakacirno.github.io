@@ -1922,3 +1922,68 @@ body.os-booting .os-desktop { visibility:hidden; }
     .os-boot::before,.boot-orbit,.boot-progress span { animation:none; }
     .os-window { animation:none; }
 }
+
+
+/* =========================
+   BAKA MUSIC — app-like glass UI
+========================= */
+.shared-music-widget .music-panels {
+    width: min(390px, calc(100vw - 100px));
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid rgba(142,234,255,.32);
+    border-radius: 24px;
+    background: linear-gradient(145deg, rgba(14,29,57,.97), rgba(5,10,27,.97));
+    box-shadow: 0 24px 80px rgba(0,0,0,.58), 0 0 36px rgba(94,214,255,.12), inset 0 1px rgba(255,255,255,.08);
+    backdrop-filter: blur(24px) saturate(1.25);
+}
+.baka-music-brand {
+    display:flex; align-items:center; gap:11px;
+    padding: 5px 7px 12px;
+    border-bottom:1px solid rgba(142,234,255,.13);
+    color:#effbff;
+}
+.baka-music-app-icon {
+    width:39px; height:39px; display:grid; place-items:center;
+    border-radius:13px; font-size:23px;
+    background:linear-gradient(145deg,rgba(154,241,255,.25),rgba(57,115,190,.16));
+    border:1px solid rgba(171,245,255,.42);
+    box-shadow:0 0 20px rgba(100,221,255,.15);
+}
+.baka-music-brand strong {display:block;font-size:14px;letter-spacing:.4px}
+.baka-music-brand small {display:block;margin-top:3px;font-size:8px;letter-spacing:1.7px;color:#8fb8d2}
+.baka-music-live-dot {margin-left:auto;width:7px;height:7px;border-radius:50%;background:#83f6d0;box-shadow:0 0 12px #83f6d0}
+.shared-music-widget .music-panel.panel {
+    padding:15px; border-radius:18px;
+    border:1px solid rgba(142,234,255,.17);
+    background:linear-gradient(145deg,rgba(17,34,62,.88),rgba(7,14,31,.88));
+    box-shadow:inset 0 1px rgba(255,255,255,.045);
+    max-height:min(40vh,330px);
+}
+.shared-music-widget .music-widget-heading .panel-title h2 {font-size:14px;letter-spacing:.3px}
+.shared-music-widget .music-widget-heading .panel-title {margin-bottom:5px}
+.shared-music-widget .mini-player {
+    margin-top:8px;padding:15px 12px 11px;border-radius:15px;
+    border-color:rgba(142,234,255,.17);
+    background:radial-gradient(ellipse at top,rgba(100,215,255,.12),transparent 68%),rgba(4,11,27,.48);
+}
+.shared-music-widget .mini-player-title {font-size:16px;line-height:1.45}
+.shared-music-widget .mini-player-subtitle {line-height:1.5}
+.shared-music-widget .music-panel .mini-player-controls button {
+    min-width:112px; font-weight:700;
+    color:#061426;background:linear-gradient(135deg,#d9fbff,#79dfff);
+    border:0; box-shadow:0 5px 20px rgba(86,209,255,.18);
+}
+.shared-music-widget .music-panel .mini-player-controls button:hover {background:linear-gradient(135deg,#fff,#a4edff)}
+.shared-music-widget .version-button {font-size:11px;padding:8px 13px}
+.shared-music-widget .version-button.active {color:#071628;background:linear-gradient(135deg,#d9fbff,#79dfff);border-color:transparent}
+.shared-music-widget .music-progress {margin-top:12px}
+.shared-music-widget input[type="range"] {accent-color:#8eeaff;cursor:pointer}
+.shared-music-widget .lyrics-panel {margin-top:12px;padding:10px;border-radius:12px;background:rgba(0,0,0,.2)}
+.shared-music-widget .lyric-line {font-size:11px}
+.shared-music-widget .lyric-line.active {font-size:13px}
+.baka-music-desktop-icon > span {filter:drop-shadow(0 0 7px rgba(142,234,255,.55))}
+@media (max-width:650px) {
+ .shared-music-widget .music-panels {width:min(330px,calc(100vw - 76px));padding:9px;border-radius:19px}
+ .shared-music-widget .music-panel.panel {padding:11px}
+}
