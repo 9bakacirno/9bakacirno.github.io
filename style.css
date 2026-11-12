@@ -1629,3 +1629,90 @@ footer {
     .music-widget .music-panel.panel { right: 56px !important; left: auto !important; width: min(300px, calc(100vw - 78px)); }
     .music-widget.docked-left .music-panel.panel { left: 56px !important; right: auto !important; }
 }
+
+
+/* SINGLE DROPLET / TWO INDEPENDENT WINDOWS */
+.shared-music-widget {
+    width: 56px;
+}
+.shared-music-widget .music-panels {
+    position: absolute;
+    top: 50%;
+    right: 66px;
+    left: auto;
+    bottom: auto;
+    transform: translateY(-50%);
+    width: min(340px, calc(100vw - 100px));
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+    z-index: 1001;
+}
+.shared-music-widget.docked-left .music-panels {
+    left: 66px;
+    right: auto;
+}
+.shared-music-widget .music-panel.panel {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    width: 100%;
+    max-height: min(43vh, 360px);
+    overflow-y: auto;
+    margin: 0;
+    padding: 18px;
+    pointer-events: auto;
+}
+.shared-music-widget .music-panel[hidden] {
+    display: none !important;
+}
+.shared-music-widget .music-widget-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.shared-music-widget .music-widget-heading .panel-title {
+    min-width: 0;
+    margin-bottom: 10px;
+}
+.shared-music-widget .music-close {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(197, 244, 255, .38);
+    border-radius: 50%;
+    color: #e9fbff;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+.shared-music-widget .mini-player {
+    text-align: center;
+}
+.shared-music-widget .lyrics-panel {
+    max-height: 140px;
+    overflow-y: auto;
+}
+.shared-music-widget .music-panel .panel-title h2 {
+    font-size: 17px;
+}
+@media (max-width: 650px) {
+    .shared-music-widget { width: 48px; }
+    .shared-music-widget .music-panels {
+        width: min(300px, calc(100vw - 78px));
+        right: 56px;
+        gap: 8px;
+    }
+    .shared-music-widget.docked-left .music-panels {
+        left: 56px;
+        right: auto;
+    }
+    .shared-music-widget .music-panel.panel {
+        max-height: min(43vh, 320px);
+        padding: 13px;
+    }
+}
