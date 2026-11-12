@@ -681,7 +681,7 @@ setInterval(() => {
         if (date) date.textContent = new Intl.DateTimeFormat(undefined, {month:"short", day:"2-digit"}).format(now);
     }
     updateTaskbarClock();
-    window.setInterval(updateTaskbarClock, 1000);
+    window.setInterval(updateTaskbarClock, 1000);\n\n    // Register the installable Baka Music / ICE FAIRY OS web app.\n    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {\n        window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}), { once: true });\n    }
 
     function finishBoot() {
         if (!boot || boot.classList.contains("is-done")) return;
