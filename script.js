@@ -36,12 +36,8 @@ setInterval(createParticle, 350);
 
 
 /* =========================
-   MUSIC PLAYER
+   DUAL MUSIC PLAYERS
 ========================= */
-
-const music = document.getElementById("music");
-const musicButton = document.getElementById("musicButton");
-const musicStatus = document.getElementById("music-status");
 
 const musicToggle = document.getElementById("musicToggle");
 const musicPanel = document.getElementById("musicPanel");
@@ -51,14 +47,12 @@ function setMusicPanelOpen(open) {
     if (!musicPanel || !musicToggle) return;
     musicPanel.hidden = !open;
     musicToggle.setAttribute("aria-expanded", String(open));
-    musicToggle.setAttribute("aria-label", open ? "Close music player" : "Open music player");
+    musicToggle.setAttribute("aria-label", open ? "Close music players" : "Open music players");
     musicToggle.classList.toggle("is-open", open);
 }
 
 if (musicToggle && musicPanel) {
-    musicToggle.addEventListener("click", () => {
-        setMusicPanelOpen(musicPanel.hidden);
-    });
+    musicToggle.addEventListener("click", () => setMusicPanelOpen(musicPanel.hidden));
 }
 if (musicClose) {
     musicClose.addEventListener("click", () => setMusicPanelOpen(false));
@@ -69,345 +63,134 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
-const normalButton = document.getElementById("normalButton");
-const slowedButton = document.getElementById("slowedButton");
-
-const progressBar = document.getElementById("progressBar");
-const currentTimeDisplay = document.getElementById("currentTime");
-const durationDisplay = document.getElementById("duration");
-
-let playing = false;
-let musicVersion = "normal";
-
-const musicSources = {
-    normal: "menu-holiday.mp3",
-    slowed: "menu-holiday.mp3"
-};
-
-/* =========================
-   SYNCHRONIZED LYRICS
-========================= */
-
-const lyricsDisplay = document.getElementById("lyricsDisplay");
-
-let lyricLines = [];
-let lyricElements = [];
-let activeLyricIndex = -1;
-
-// Normal song duration: 2:16 = 136 seconds.
-// Used as a fallback until the browser loads the actual duration.
-let normalDuration = 136;
-
-function parseLRC(text) {
-    const lines = [];
-
-    for (const line of text.split(/\r?\n/)) {
-        const timestamps = [
-             ...line.matchAll(/\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g)
-         ];
-
-        if (timestamps.length === 0) continue;
-
-        const lyric = line
-          .replace(/\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g, "")
-          .trim();
-
-        for (const match of timestamps) {
-            const minutes = Number(match[1]);
-            const seconds = Number(match[2]);
-            const fraction = (match[3] || "0").padEnd(3, "0");
-
-            const time =
-                minutes * 60 +
-                seconds +
-                Number(fraction) / 1000;
-
-            lines.push({ time, text: lyric });
-        }
-    }
-
-    return lines.sort((a, b) => a.time - b.time);
+function formatMusicTime(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+    return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 }
 
-function renderLyrics() {
-    if (!lyricsDisplay) return;
+function setupMusicPlayer(config) {
+    const audio = document.getElementById(config.audioId);
+    const button = document.getElementById(config.buttonId);
+    const progress = document.getElementById(config.progressId);
+    const currentTime = document.getElementById(config.currentTimeId);
+    const duration = document.getElementById(config.durationId);
+    const status = document.getElementById(config.statusId);
 
-    lyricsDisplay.replaceChildren();
-    lyricElements = [];
-    activeLyricIndex = -1;
+    if (!audio || !button) return null;
 
-    if (lyricLines.length === 0) {
-        const message = document.createElement("p");
-        message.className = "lyric-line";
-        message.textContent = "No lyrics found.";
-        lyricsDisplay.appendChild(message);
-        return;
+    function updateButton() {
+        button.textContent = audio.paused ? "▶ Play" : "⏸ Pause";
     }
 
-    for (const line of lyricLines) {
-        const element = document.createElement("p");
-        element.className = "lyric-line";
-        element.textContent = line.text || "♪";
-        lyricsDisplay.appendChild(element);
-        lyricElements.push(element);
-    }
-
-    updateLyrics();
-}
-
-async function loadLyrics() {
-    if (!lyricsDisplay) return;
-
-    try {
-        const response = await fetch("awful.lrc");
-
-        if (!response.ok) {
-            throw new Error("Could not load awful.lrc");
-        }
-
-        const text = await response.text();
-        lyricLines = parseLRC(text);
-        renderLyrics();
-    } catch (error) {
-    lyricsDisplay.textContent =
-        "Lyrics error: " + error.message;
-    console.error("Lyrics loading failed:", error);
-   }
-}
-
-function updateLyrics() {
-    if (!music || lyricLines.length === 0) return;
-
-    if (
-        musicVersion === "normal" &&
-        Number.isFinite(music.duration) &&
-        music.duration > 0
-    ) {
-        normalDuration = music.duration;
-    }
-
-    const currentDuration = music.duration;
-    let lyricTime = music.currentTime;
-
-    if (
-        musicVersion === "slowed" &&
-        Number.isFinite(currentDuration) &&
-        currentDuration > 0 &&
-        normalDuration > 0
-    ) {
-        lyricTime =
-            music.currentTime * normalDuration / currentDuration;
-    }
-
-    let nextIndex = -1;
-
-    for (let i = 0; i < lyricLines.length; i++) {
-        if (lyricLines[i].time <= lyricTime) {
-            nextIndex = i;
+    function updateProgress() {
+        const total = audio.duration;
+        if (Number.isFinite(total) && total > 0) {
+            if (progress) progress.value = (audio.currentTime / total) * 100;
+            if (currentTime) currentTime.textContent = formatMusicTime(audio.currentTime);
+            if (duration) duration.textContent = formatMusicTime(total);
         } else {
-            break;
+            if (progress) progress.value = 0;
+            if (currentTime) currentTime.textContent = formatMusicTime(0);
+            if (duration) duration.textContent = "0:00";
         }
     }
 
-    // Remove all old highlights first
-    lyricElements.forEach((element) => {
-        element.classList.remove("active");
+    button.addEventListener("click", async () => {
+        // Avoid both players playing over each other.
+        document.querySelectorAll(".independent-audio").forEach((other) => {
+            if (other !== audio) other.pause();
+        });
+        if (audio.paused) {
+            try {
+                await audio.play();
+            } catch (error) {
+                if (status) status.textContent = "Playback blocked or audio file unavailable — click Play again.";
+            }
+        } else {
+            audio.pause();
+        }
+        updateButton();
     });
 
-    activeLyricIndex = nextIndex;
+    audio.addEventListener("play", () => {
+        document.querySelectorAll(".independent-audio").forEach((other) => {
+            if (other !== audio) other.pause();
+        });
+        updateButton();
+        if (status) status.textContent = config.playingText;
+    });
+    audio.addEventListener("pause", updateButton);
+    audio.addEventListener("ended", updateButton);
+    audio.addEventListener("timeupdate", updateProgress);
+    audio.addEventListener("loadedmetadata", updateProgress);
+    audio.addEventListener("durationchange", updateProgress);
 
-    // Highlight only the current lyric
-    if (activeLyricIndex >= 0 && lyricElements[activeLyricIndex]) {
-        const activeElement = lyricElements[activeLyricIndex];
-
-        activeElement.classList.add("active");
-        activeElement.scrollIntoView({
-            behavior: "smooth",
-            block: "nearest"
+    if (progress) {
+        progress.addEventListener("input", () => {
+            if (Number.isFinite(audio.duration) && audio.duration > 0) {
+                audio.currentTime = (Number(progress.value) / 100) * audio.duration;
+                updateProgress();
+            }
         });
     }
-}
-loadLyrics();
 
-function formatTime(seconds) {
-    if (!Number.isFinite(seconds) || seconds < 0) {
-        return "0:00";
-    }
-
-    const minutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-
-    return `${minutes}:${String(secs).padStart(2, "0")}`;
+    audio.classList.add("independent-audio");
+    return { audio, updateButton, updateProgress };
 }
 
-function updateProgress() {
-    if (!music || !progressBar) return;
-
-    const duration = music.duration;
-
-    if (Number.isFinite(duration) && duration > 0) {
-        progressBar.value = (music.currentTime / duration) * 100;
-
-        if (currentTimeDisplay) {
-            currentTimeDisplay.textContent = formatTime(music.currentTime);
-        }
-
-        if (durationDisplay) {
-            durationDisplay.textContent = formatTime(duration);
-        }
-    } else {
-        progressBar.value = 0;
-
-        if (currentTimeDisplay) currentTimeDisplay.textContent = "0:00";
-        if (durationDisplay) durationDisplay.textContent = "0:00";
-    }
-}
-
-function updatePlayButton() {
-    playing = !music.paused;
-    musicButton.textContent = playing ? "⏸ Pause" : "▶ Play";
-}
-
-function updateVersionButtons() {
-    if (normalButton) {
-        normalButton.classList.toggle("active", musicVersion === "normal");
-    }
-
-    if (slowedButton) {
-        slowedButton.classList.toggle("active", musicVersion === "slowed");
-    }
-}
-
-// Play / pause
-if (music && musicButton) {
-    musicButton.addEventListener("click", async () => {
-        if (music.paused) {
-            try {
-                await music.play();
-            } catch (error) {
-                if (musicStatus) {
-                    musicStatus.textContent =
-                        "Couldn't play music — check the audio file names.";
-                }
-            }
-        } else {
-            music.pause();
-        }
-    });
-
-    music.addEventListener("play", () => {
-        updatePlayButton();
-
-        if (musicStatus) {
-            musicStatus.textContent = "♪ Now playing — Nico’s Nextbots OST: Menu (Holiday & In-Game Version)";
-        }
-    });
-
-    music.addEventListener("pause", updatePlayButton);
-
-    music.addEventListener("ended", () => {
-        updatePlayButton();
-    });
-
-    music.addEventListener("timeupdate", () => {
-    updateProgress();
-    updateLyrics();
+const menuPlayer = setupMusicPlayer({
+    audioId: "menuAudio",
+    buttonId: "menuPlayButton",
+    progressId: "menuProgressBar",
+    currentTimeId: "menuCurrentTime",
+    durationId: "menuDuration",
+    statusId: "menuStatus",
+    playingText: "♪ Playing Menu OST"
 });
 
-music.addEventListener("loadedmetadata", () => {
-    if (
-        musicVersion === "normal" &&
-        Number.isFinite(music.duration) &&
-        music.duration > 0
-    ) {
-        normalDuration = music.duration;
-    }
+const libraryAudio = document.getElementById("libraryAudio");
+const libraryTrack = document.getElementById("libraryTrack");
+const libraryStatus = document.getElementById("libraryStatus");
 
-    updateProgress();
-    updateLyrics();
+const libraryPlayer = setupMusicPlayer({
+    audioId: "libraryAudio",
+    buttonId: "libraryPlayButton",
+    progressId: "libraryProgressBar",
+    currentTimeId: "libraryCurrentTime",
+    durationId: "libraryDuration",
+    statusId: "libraryStatus",
+    playingText: "♪ Playing selected track"
 });
 
-music.addEventListener("durationchange", () => {
-    updateProgress();
-    updateLyrics();
-});
-}
-
-// Seek by dragging the progress bar
-if (music && progressBar) {
-    progressBar.addEventListener("input", () => {
-        if (Number.isFinite(music.duration) && music.duration > 0) {
-            music.currentTime =
-                (Number(progressBar.value) / 100) * music.duration;
-
-            if (currentTimeDisplay) {
-                currentTimeDisplay.textContent = formatTime(music.currentTime);
-            }
+// Future songs can be added as <option value="filename.mp3">Song — Artist</option>
+// in index.html. Changing the selection updates only the Other Music player.
+if (libraryTrack && libraryAudio) {
+    libraryTrack.addEventListener("change", () => {
+        const wasPlaying = !libraryAudio.paused;
+        libraryAudio.pause();
+        libraryAudio.src = libraryTrack.value;
+        libraryAudio.load();
+        const selectedLabel = libraryTrack.options[libraryTrack.selectedIndex]?.text || "Selected track";
+        if (libraryStatus) libraryStatus.textContent = selectedLabel + " · Ready";
+        const currentTime = document.getElementById("libraryCurrentTime");
+        const duration = document.getElementById("libraryDuration");
+        const progress = document.getElementById("libraryProgressBar");
+        if (currentTime) currentTime.textContent = "0:00";
+        if (duration) duration.textContent = "0:00";
+        if (progress) progress.value = 0;
+        if (wasPlaying) {
+            libraryAudio.play().catch(() => {
+                if (libraryStatus) libraryStatus.textContent = "Click Play to start this track.";
+            });
         }
     });
 }
 
-// Switch between Normal and Slowed
-async function switchMusicVersion(version) {
-    if (!music || version === musicVersion) return;
-
-    const wasPlaying = !music.paused;
-    musicVersion = version;
-
-    music.pause();
-    music.src = musicSources[version];
-    music.load();
-   activeLyricIndex = -1;
-   updateLyrics();
-
-    if (progressBar) progressBar.value = 0;
-    if (currentTimeDisplay) currentTimeDisplay.textContent = "0:00";
-    if (durationDisplay) durationDisplay.textContent = "0:00";
-
-    updateVersionButtons();
-
-    if (musicStatus) {
-        musicStatus.textContent = "Nico’s Nextbots OST — Menu (Holiday & In-Game Version)";
-    }
-
-    if (wasPlaying) {
-        try {
-            await music.play();
-        } catch (error) {
-            if (musicStatus) {
-                musicStatus.textContent =
-                    "Couldn't play music — check the audio file names.";
-            }
-        }
-    }
-}
-
-if (normalButton) {
-    normalButton.addEventListener("click", () => {
-        switchMusicVersion("normal");
-    });
-}
-
-if (slowedButton) {
-    slowedButton.addEventListener("click", () => {
-        switchMusicVersion("slowed");
-    });
-}
-
-updateVersionButtons();
-
-// Try to start the soundtrack on page entry. Browsers may block audible
-// autoplay until the visitor interacts with the page.
-if (music) {
-    music.src = "menu-holiday.mp3";
-    music.load();
-    music.play().then(() => {
-        updatePlayButton();
-    }).catch(() => {
-        if (musicStatus) {
-            musicStatus.textContent = "Nico’s Nextbots OST — click Play to start";
-        }
-        updatePlayButton();
+// Attempt autoplay for the dedicated Menu player. Browsers may block audible autoplay.
+if (menuPlayer) {
+    menuPlayer.audio.play().catch(() => {
+        const status = document.getElementById("menuStatus");
+        if (status) status.textContent = "Menu OST · Click Play to start";
     });
 }
 
