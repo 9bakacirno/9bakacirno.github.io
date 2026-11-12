@@ -80,8 +80,8 @@ let playing = false;
 let musicVersion = "normal";
 
 const musicSources = {
-    normal: "awful.mp3",
-    slowed: "awful-slowed.mp3"
+    normal: "menu-holiday.mp3",
+    slowed: "menu-holiday.mp3"
 };
 
 /* =========================
@@ -299,10 +299,7 @@ if (music && musicButton) {
         updatePlayButton();
 
         if (musicStatus) {
-            musicStatus.textContent =
-                musicVersion === "normal"
-                    ? "♪ Now playing — Normal"
-                    : "♪ Now playing — Slowed";
+            musicStatus.textContent = "♪ Now playing — Nico’s Nextbots OST: Menu (Holiday & In-Game Version)";
         }
     });
 
@@ -370,10 +367,7 @@ async function switchMusicVersion(version) {
     updateVersionButtons();
 
     if (musicStatus) {
-        musicStatus.textContent =
-            version === "normal"
-                ? "AWFUL — Normal version"
-                : "AWFUL — Slowed version";
+        musicStatus.textContent = "Nico’s Nextbots OST — Menu (Holiday & In-Game Version)";
     }
 
     if (wasPlaying) {
@@ -401,6 +395,21 @@ if (slowedButton) {
 }
 
 updateVersionButtons();
+
+// Try to start the soundtrack on page entry. Browsers may block audible
+// autoplay until the visitor interacts with the page.
+if (music) {
+    music.src = "menu-holiday.mp3";
+    music.load();
+    music.play().then(() => {
+        updatePlayButton();
+    }).catch(() => {
+        if (musicStatus) {
+            musicStatus.textContent = "Nico’s Nextbots OST — click Play to start";
+        }
+        updatePlayButton();
+    });
+}
 
 
 /* =========================
