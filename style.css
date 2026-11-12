@@ -1167,7 +1167,8 @@ footer {
     transform: translateX(-3px);
 }
 .music-widget .music-panel.panel {
-    position: fixed;
+    /* Position relative to the droplet widget so the panel travels with it. */
+    position: absolute;
     top: 50%;
     right: 66px;
     left: auto;
