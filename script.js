@@ -52,6 +52,8 @@ setInterval(createParticle, 350);
         const anyOpen = !menuPanel.hidden || !awfulPanel.hidden;
         toggle.setAttribute("aria-expanded", String(anyOpen));
         toggle.classList.toggle("is-open", anyOpen);
+        const widget = toggle.closest(".shared-music-widget");
+        if (widget) widget.classList.toggle("is-expanded", anyOpen);
     }
     function closeBoth() {
         menuPanel.hidden = true;
