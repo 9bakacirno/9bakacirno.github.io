@@ -681,7 +681,14 @@ setInterval(() => {
         if (date) date.textContent = new Intl.DateTimeFormat(undefined, {month:"short", day:"2-digit"}).format(now);
     }
     updateTaskbarClock();
-    window.setInterval(updateTaskbarClock, 1000);\n\n    // Register the installable Baka Music / ICE FAIRY OS web app.\n    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {\n        window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}), { once: true });\n    }
+    window.setInterval(updateTaskbarClock, 1000);
+
+    // Remove the old optional cache worker; it is not needed for this site.
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => registration.unregister());
+        }).catch(() => {});
+    }
 
     function finishBoot() {
         if (!boot || boot.classList.contains("is-done")) return;
@@ -692,7 +699,7 @@ setInterval(() => {
         window.setTimeout(() => { if (boot.parentNode) boot.remove(); }, 800);
     }
     if (bootSkip) bootSkip.addEventListener("click", finishBoot);
-    window.setTimeout(finishBoot, 2900);
+    window.setTimeout(finishBoot, 900);
     window.addEventListener("resize", () => {
         document.querySelectorAll(".os-window:not(.is-maximized)").forEach(win => {
             if (win.style.left && win.style.transform === "none") {
