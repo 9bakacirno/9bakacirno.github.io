@@ -719,6 +719,17 @@ setInterval(() => {
                 if (suppressClick) { event.preventDefault(); event.stopImmediatePropagation(); }
             }, true);
         });
+        const resetButton = document.getElementById("resetDesktopIcons");
+        if (resetButton) resetButton.addEventListener("click", () => {
+            saved = {};
+            icons.forEach((icon, index) => {
+                icon.style.left = "0px";
+                icon.style.top = (index * 94) + "px";
+                icon.style.zIndex = "";
+            });
+            try { localStorage.removeItem(storageKey); } catch (_) {}
+        });
+
         window.addEventListener("resize", () => {
             const areaRect = iconArea.getBoundingClientRect();
             const taskbarHeight = document.querySelector(".os-taskbar")?.getBoundingClientRect().height || 58;
