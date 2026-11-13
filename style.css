@@ -1837,6 +1837,8 @@ body.os-mode { height: 100vh; min-height: 100vh; overflow: hidden; background: #
 .settings-note p { margin:0; color:#a9bfd0; font-size:11px; line-height:1.7; }
 .settings-note b { color:#f0dce8; }
 .os-primary-button { width:100%; padding:11px 15px; border:1px solid rgba(206,246,255,.45); border-radius:11px; color:#08213a; font-weight:700; background:linear-gradient(135deg,#e6fbff,#8bdcff); cursor:pointer; box-shadow:0 5px 22px rgba(108,204,255,.12); }
+.os-reset-button { margin-bottom:9px; color:#d8f4ff; border-color:rgba(190,231,255,.22); background:rgba(155,211,245,.08); box-shadow:none; }
+.os-reset-button:hover { background:rgba(155,211,245,.16); }
 .os-start-menu {
     position:absolute; z-index:90; left:14px; bottom:calc(var(--os-bar-height) + 12px);
     width:min(330px,calc(100vw - 28px)); padding:18px; border:1px solid rgba(202,242,255,.26);
