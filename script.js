@@ -596,15 +596,13 @@ setInterval(() => {
         const win = windows[button.dataset.maximize];
         if (!win) return;
         if (!win.classList.contains("is-maximized")) {
-            // Save every inline coordinate: dragging sets right/bottom to auto,
-            // which would override the CSS inset used by the maximized window.
-            win.dataset.restoreLeft = win.style.left;
-            win.dataset.restoreTop = win.style.top;
-            win.dataset.restoreRight = win.style.right;
-            win.dataset.restoreBottom = win.style.bottom;
-            win.dataset.restoreTransform = win.style.transform;
+            const rect = win.getBoundingClientRect();
+            win.dataset.restoreX = String(rect.left);
+            win.dataset.restoreY = String(rect.top);
+            win.dataset.restoreWidth = String(rect.width);
+            win.dataset.restoreHeight = String(rect.height);
             win.classList.add("is-maximized");
-            // Clear all inline offsets so .is-maximized can control all four edges.
+            win.style.position = "fixed";
             win.style.left = "";
             win.style.top = "";
             win.style.right = "";
@@ -614,27 +612,24 @@ setInterval(() => {
             win.style.transform = "";
         } else {
             win.classList.remove("is-maximized");
-            win.style.left = win.dataset.restoreLeft || "";
-            win.style.top = win.dataset.restoreTop || "";
-            win.style.right = win.dataset.restoreRight || "";
-            win.style.bottom = win.dataset.restoreBottom || "";
-            win.style.transform = win.dataset.restoreTransform || ((win.style.left || win.style.top) ? "none" : "");
-            delete win.dataset.restoreLeft;
-            delete win.dataset.restoreTop;
-            delete win.dataset.restoreRight;
-            delete win.dataset.restoreBottom;
-            delete win.dataset.restoreTransform;
-            // Re-clamp after restoring, for example when the viewport was resized.
-            requestAnimationFrame(() => {
-                const taskbar = document.querySelector(".os-taskbar");
-                const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
-                const rect = win.getBoundingClientRect();
-                const maxLeft = Math.max(0, window.innerWidth - rect.width);
-                const maxTop = Math.max(0, window.innerHeight - taskbarHeight - rect.height);
-                win.style.left = Math.max(0, Math.min(maxLeft, rect.left)) + "px";
-                win.style.top = Math.max(0, Math.min(maxTop, rect.top)) + "px";
-                win.style.transform = "none";
-            });
+            const taskbar = document.querySelector(".os-taskbar");
+            const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
+            const width = Math.min(Number(win.dataset.restoreWidth) || 720, window.innerWidth - 16);
+            const height = Math.min(Number(win.dataset.restoreHeight) || 480, window.innerHeight - taskbarHeight - 16);
+            const maxLeft = Math.max(0, window.innerWidth - width);
+            const maxTop = Math.max(0, window.innerHeight - taskbarHeight - height);
+            win.style.position = "fixed";
+            win.style.width = width + "px";
+            win.style.height = height + "px";
+            win.style.left = Math.max(0, Math.min(maxLeft, Number(win.dataset.restoreX) || 0)) + "px";
+            win.style.top = Math.max(0, Math.min(maxTop, Number(win.dataset.restoreY) || 0)) + "px";
+            win.style.right = "auto";
+            win.style.bottom = "auto";
+            win.style.transform = "none";
+            delete win.dataset.restoreX;
+            delete win.dataset.restoreY;
+            delete win.dataset.restoreWidth;
+            delete win.dataset.restoreHeight;
         }
         zUp(win);
     }));
@@ -658,7 +653,8 @@ setInterval(() => {
         if (event.key === "Escape") closeStartMenu();
     });
 
-    // Drag windows using one coordinate system: the offset parent's local coordinates.
+    // Record the visual rectangle on pointerdown, but do not change styles until
+    // the pointer actually moves. This prevents the instant jump from centered CSS.
     document.querySelectorAll("[data-drag-window]").forEach(bar => {
         const id = bar.dataset.dragWindow;
         const win = windows[id];
@@ -668,22 +664,13 @@ setInterval(() => {
             if (event.target.closest("button") || win.classList.contains("is-maximized")) return;
             if (event.button !== undefined && event.button !== 0) return;
             const rect = win.getBoundingClientRect();
-            const parent = win.offsetParent;
-            const parentRect = parent ? parent.getBoundingClientRect() : { left: 0, top: 0 };
-            const left = rect.left - parentRect.left;
-            const top = rect.top - parentRect.top;
-            // Convert the centered CSS position into stable top-left coordinates before moving.
-            win.style.left = left + "px";
-            win.style.top = top + "px";
-            win.style.right = "auto";
-            win.style.bottom = "auto";
-            win.style.transform = "none";
             drag = {
                 startX: event.clientX,
                 startY: event.clientY,
-                left,
-                top,
-                parent,
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                height: rect.height,
                 moved: false
             };
             try { bar.setPointerCapture(event.pointerId); } catch (_) {}
@@ -695,19 +682,17 @@ setInterval(() => {
             const dy = event.clientY - drag.startY;
             if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
             if (!drag.moved) return;
+            event.preventDefault();
             const taskbar = document.querySelector(".os-taskbar");
             const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
-            const rect = win.getBoundingClientRect();
-            const parent = drag.parent;
-            const parentRect = parent ? parent.getBoundingClientRect() : { left: 0, top: 0 };
-            const parentWidth = parent ? parent.clientWidth : window.innerWidth;
-            const parentHeight = parent ? parent.clientHeight : window.innerHeight;
-            const maxLeft = Math.max(0, parentWidth - rect.width);
-            const maxTop = Math.max(0, parentHeight - taskbarHeight - rect.height);
-            const left = Math.max(0, Math.min(maxLeft, drag.left + dx));
-            const top = Math.max(0, Math.min(maxTop, drag.top + dy));
-            win.style.left = left + "px";
-            win.style.top = top + "px";
+            const maxLeft = Math.max(0, window.innerWidth - drag.width);
+            const maxTop = Math.max(0, window.innerHeight - taskbarHeight - drag.height);
+            win.style.position = "fixed";
+            win.style.transform = "none";
+            win.style.right = "auto";
+            win.style.bottom = "auto";
+            win.style.left = Math.max(0, Math.min(maxLeft, drag.left + dx)) + "px";
+            win.style.top = Math.max(0, Math.min(maxTop, drag.top + dy)) + "px";
         });
         const endDrag = () => { drag = null; };
         bar.addEventListener("pointerup", endDrag);
