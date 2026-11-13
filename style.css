@@ -1772,7 +1772,7 @@ body.os-mode { height: 100vh; min-height: 100vh; overflow: hidden; background: #
 .os-brandmark strong,.os-brandmark small { display:block; }
 .os-brandmark strong { font:600 11px "Orbitron",sans-serif; letter-spacing:1.4px; }
 .os-brandmark small { margin-top:5px; color:#9dbbd2; font-size:10px; }
-.desktop-icons { position:absolute; z-index:10; top:112px; left:25px; display:block; width:96px; height:calc(100% - 150px); pointer-events:none; }
+.desktop-icons { position:absolute; z-index:10; top:112px; left:25px; right:25px; display:block; width:auto; height:calc(100% - 150px); pointer-events:none; }
 .desktop-icons .desktop-icon { pointer-events:auto; cursor:grab; }
 .desktop-icons .desktop-icon:active { cursor:grabbing; }
 .desktop-icon {
@@ -1910,7 +1910,7 @@ body.os-booting .os-desktop { visibility:hidden; }
     .os-brandmark > span { width:32px; height:32px; border-radius:10px; font-size:16px; }
     .os-brandmark strong { font-size:9px; }
     .os-brandmark small { font-size:9px; }
-    .desktop-icons { top:91px; left:5px; width:76px; height:calc(100% - 140px); }
+    .desktop-icons { top:91px; left:5px; right:5px; width:auto; height:calc(100% - 140px); }
     .desktop-icons .desktop-icon { width:76px !important; min-height:68px; padding:5px 2px; }
     .desktop-icon > span { width:37px; height:37px; font-size:19px; }
     .desktop-icon b { font-size:10px; }
