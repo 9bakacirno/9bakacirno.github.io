@@ -1755,7 +1755,7 @@ body.os-mode { height: 100vh; min-height: 100vh; overflow: hidden; background: #
 .os-wallpaper-glow {
     position:absolute; width:46vw; height:46vw; max-width:620px; max-height:620px;
     min-width:280px; min-height:280px; border-radius:50%; right:4%; top:7%;
-    background: radial-gradient(circle at 35% 30%, rgba(229,251,255,.8), rgba(125,218,255,.22) 23%, rgba(62,138,216,.08) 50%, transparent 70%);
+    background: radial-gradient(circle at 35% 30%, rgba(229,251,255,.28), rgba(125,218,255,.09) 23%, rgba(62,138,216,.025) 50%, transparent 70%);
     filter: blur(2px); pointer-events:none;
 }
 .os-wallpaper-glow::after {
