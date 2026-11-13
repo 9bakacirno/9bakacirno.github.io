@@ -658,7 +658,7 @@ setInterval(() => {
         if (event.key === "Escape") closeStartMenu();
     });
 
-    // Drag windows by their titlebars; pointer events work with mouse and touch.
+    // Drag windows using one coordinate system: the offset parent's local coordinates.
     document.querySelectorAll("[data-drag-window]").forEach(bar => {
         const id = bar.dataset.dragWindow;
         const win = windows[id];
@@ -668,38 +668,46 @@ setInterval(() => {
             if (event.target.closest("button") || win.classList.contains("is-maximized")) return;
             if (event.button !== undefined && event.button !== 0) return;
             const rect = win.getBoundingClientRect();
-            const parentRect = win.offsetParent ? win.offsetParent.getBoundingClientRect() : { left:0, top:0 };
-            // Store viewport coordinates plus the containing block origin.
-            // getBoundingClientRect() is viewport-based; style.left/top are parent-based.
-            drag = { x:event.clientX, y:event.clientY, left:rect.left, top:rect.top, parentLeft:parentRect.left, parentTop:parentRect.top, moved:false };
-            try { bar.setPointerCapture(event.pointerId); } catch (_) {}
-            zUp(win);
-        });
-        bar.addEventListener("pointermove", event => {
-            if (!drag) return;
-            const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
-            if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
-            if (!drag.moved) return;
-            // Keep the entire window inside the visible desktop area.
-            const taskbar = document.querySelector(".os-taskbar");
-            const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
-            const width = win.getBoundingClientRect().width;
-            const height = win.getBoundingClientRect().height;
             const parent = win.offsetParent;
-            const parentWidth = parent ? parent.clientWidth : window.innerWidth;
-            const parentHeight = parent ? parent.clientHeight : window.innerHeight;
-            // Convert viewport coordinates into the window's containing-block coordinates.
-            const desiredLeft = drag.left + dx - drag.parentLeft;
-            const desiredTop = drag.top + dy - drag.parentTop;
-            const maxLeft = Math.max(0, parentWidth - width);
-            const maxTop = Math.max(0, parentHeight - taskbarHeight - height);
-            const left = Math.max(0, Math.min(maxLeft, desiredLeft));
-            const top = Math.max(0, Math.min(maxTop, desiredTop));
+            const parentRect = parent ? parent.getBoundingClientRect() : { left: 0, top: 0 };
+            const left = rect.left - parentRect.left;
+            const top = rect.top - parentRect.top;
+            // Convert the centered CSS position into stable top-left coordinates before moving.
             win.style.left = left + "px";
             win.style.top = top + "px";
             win.style.right = "auto";
             win.style.bottom = "auto";
             win.style.transform = "none";
+            drag = {
+                startX: event.clientX,
+                startY: event.clientY,
+                left,
+                top,
+                parent,
+                moved: false
+            };
+            try { bar.setPointerCapture(event.pointerId); } catch (_) {}
+            zUp(win);
+        });
+        bar.addEventListener("pointermove", event => {
+            if (!drag) return;
+            const dx = event.clientX - drag.startX;
+            const dy = event.clientY - drag.startY;
+            if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+            if (!drag.moved) return;
+            const taskbar = document.querySelector(".os-taskbar");
+            const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
+            const rect = win.getBoundingClientRect();
+            const parent = drag.parent;
+            const parentRect = parent ? parent.getBoundingClientRect() : { left: 0, top: 0 };
+            const parentWidth = parent ? parent.clientWidth : window.innerWidth;
+            const parentHeight = parent ? parent.clientHeight : window.innerHeight;
+            const maxLeft = Math.max(0, parentWidth - rect.width);
+            const maxTop = Math.max(0, parentHeight - taskbarHeight - rect.height);
+            const left = Math.max(0, Math.min(maxLeft, drag.left + dx));
+            const top = Math.max(0, Math.min(maxTop, drag.top + dy));
+            win.style.left = left + "px";
+            win.style.top = top + "px";
         });
         const endDrag = () => { drag = null; };
         bar.addEventListener("pointerup", endDrag);
