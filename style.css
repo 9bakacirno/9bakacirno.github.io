@@ -2018,3 +2018,9 @@ body.os-booting .os-desktop { visibility:hidden; }
  .shared-music-widget .music-panels {width:min(330px,calc(100vw - 76px));padding:9px;border-radius:19px}
  .shared-music-widget .music-panel.panel {padding:11px}
 }
+
+
+/* Keep Baka Music compact when its player panels are closed. */
+.shared-music-widget:not(.is-expanded) .music-panels { display:none !important; }
+/* The old landing-page moon should not appear behind ICE FAIRY OS. */
+body.os-mode > .moon { display:none !important; }
