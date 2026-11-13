@@ -1,7 +1,7 @@
 {
-  "name": "Baka Music",
-  "short_name": "Baka Music",
-  "description": "Ice-powered music player from 9bakacirno",
+  "name": "9bakacirno ❄️",
+  "short_name": "9bakacirno",
+  "description": "9bakacirno's little corner of Gensokyo",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -9,10 +9,10 @@
   "theme_color": "#081326",
   "icons": [
     {
-      "src": "baka-music-icon.svg",
+      "src": "favicon.png",
       "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
