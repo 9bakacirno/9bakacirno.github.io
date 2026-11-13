@@ -653,6 +653,87 @@ setInterval(() => {
         if (event.key === "Escape") closeStartMenu();
     });
 
+    // Windows-style desktop icon dragging with locally remembered positions.
+    (() => {
+        const iconArea = document.querySelector(".desktop-icons");
+        if (!iconArea) return;
+        const icons = Array.from(iconArea.querySelectorAll(".desktop-icon"));
+        const storageKey = "iceFairyOSDesktopIcons";
+        let saved = {};
+        try { saved = JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch (_) {}
+        iconArea.style.position = "absolute";
+        iconArea.style.display = "block";
+        iconArea.style.height = "calc(100% - 150px)";
+        icons.forEach((icon, index) => {
+            icon.style.position = "absolute";
+            icon.style.left = "0px";
+            icon.style.top = (index * 94) + "px";
+            icon.style.width = "88px";
+            icon.style.touchAction = "none";
+            const key = icon.dataset.desktopIconId || String(index);
+            const savedPos = saved[key];
+            if (savedPos && Number.isFinite(savedPos.x) && Number.isFinite(savedPos.y)) {
+                icon.style.left = savedPos.x + "px";
+                icon.style.top = savedPos.y + "px";
+            }
+            let drag = null;
+            let suppressClick = false;
+            icon.addEventListener("pointerdown", event => {
+                if (event.button !== undefined && event.button !== 0) return;
+                const rect = icon.getBoundingClientRect();
+                drag = { id:event.pointerId, startX:event.clientX, startY:event.clientY, left:rect.left, top:rect.top, moved:false };
+                try { icon.setPointerCapture(event.pointerId); } catch (_) {}
+                icon.style.zIndex = "5";
+            });
+            icon.addEventListener("pointermove", event => {
+                if (!drag || event.pointerId !== drag.id) return;
+                const dx = event.clientX - drag.startX;
+                const dy = event.clientY - drag.startY;
+                if (Math.abs(dx) + Math.abs(dy) > 5) drag.moved = true;
+                if (!drag.moved) return;
+                event.preventDefault();
+                const areaRect = iconArea.getBoundingClientRect();
+                const taskbarHeight = document.querySelector(".os-taskbar")?.getBoundingClientRect().height || 58;
+                const maxX = Math.max(0, areaRect.width - icon.offsetWidth);
+                const maxY = Math.max(0, window.innerHeight - taskbarHeight - areaRect.top - icon.offsetHeight);
+                const x = Math.max(0, Math.min(maxX, drag.left + dx - areaRect.left));
+                const y = Math.max(0, Math.min(maxY, drag.top + dy - areaRect.top));
+                icon.style.left = x + "px";
+                icon.style.top = y + "px";
+            });
+            const finish = () => {
+                if (!drag) return;
+                if (drag.moved) {
+                    suppressClick = true;
+                    saved[key] = { x:parseFloat(icon.style.left)||0, y:parseFloat(icon.style.top)||0 };
+                    try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch (_) {}
+                    window.setTimeout(() => { suppressClick = false; }, 0);
+                }
+                drag = null;
+                icon.style.zIndex = "";
+            };
+            icon.addEventListener("pointerup", finish);
+            icon.addEventListener("pointercancel", finish);
+            icon.addEventListener("lostpointercapture", finish);
+            icon.addEventListener("click", event => {
+                if (suppressClick) { event.preventDefault(); event.stopImmediatePropagation(); }
+            }, true);
+        });
+        window.addEventListener("resize", () => {
+            const areaRect = iconArea.getBoundingClientRect();
+            const taskbarHeight = document.querySelector(".os-taskbar")?.getBoundingClientRect().height || 58;
+            icons.forEach((icon, index) => {
+                const x = Math.max(0, Math.min(Math.max(0, areaRect.width-icon.offsetWidth), parseFloat(icon.style.left)||0));
+                const maxY = Math.max(0, window.innerHeight-taskbarHeight-areaRect.top-icon.offsetHeight);
+                const y = Math.max(0, Math.min(maxY, parseFloat(icon.style.top)||index*94));
+                icon.style.left = x+"px";
+                icon.style.top = y+"px";
+                saved[icon.dataset.desktopIconId || String(index)] = {x,y};
+            });
+            try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch (_) {}
+        });
+    })();
+
     // Keep every draggable window inside the usable desktop area.
     function usableBounds(win) {
         const taskbar = document.querySelector(".os-taskbar");
