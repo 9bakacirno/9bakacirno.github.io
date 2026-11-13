@@ -653,8 +653,26 @@ setInterval(() => {
         if (event.key === "Escape") closeStartMenu();
     });
 
-    // Record the visual rectangle on pointerdown, but do not change styles until
-    // the pointer actually moves. This prevents the instant jump from centered CSS.
+    // Keep every draggable window inside the usable desktop area.
+    function usableBounds(win) {
+        const taskbar = document.querySelector(".os-taskbar");
+        const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
+        const maxWidth = Math.max(180, window.innerWidth - 16);
+        const maxHeight = Math.max(140, window.innerHeight - taskbarHeight - 16);
+        const width = Math.min(win.getBoundingClientRect().width, maxWidth);
+        const height = Math.min(win.getBoundingClientRect().height, maxHeight);
+        return { taskbarHeight, maxLeft: Math.max(0, window.innerWidth - width), maxTop: Math.max(0, window.innerHeight - taskbarHeight - height), width, height };
+    }
+    function keepWindowInBounds(win) {
+        if (!win || win.hidden || win.classList.contains("is-maximized")) return;
+        const bounds = usableBounds(win);
+        if (win.style.left && win.style.transform === "none") {
+            win.style.width = bounds.width + "px";
+            win.style.height = bounds.height + "px";
+            win.style.left = Math.max(0, Math.min(bounds.maxLeft, parseFloat(win.style.left) || 0)) + "px";
+            win.style.top = Math.max(0, Math.min(bounds.maxTop, parseFloat(win.style.top) || 0)) + "px";
+        }
+    }
     document.querySelectorAll("[data-drag-window]").forEach(bar => {
         const id = bar.dataset.dragWindow;
         const win = windows[id];
@@ -664,39 +682,35 @@ setInterval(() => {
             if (event.target.closest("button") || win.classList.contains("is-maximized")) return;
             if (event.button !== undefined && event.button !== 0) return;
             const rect = win.getBoundingClientRect();
-            drag = {
-                startX: event.clientX,
-                startY: event.clientY,
-                left: rect.left,
-                top: rect.top,
-                width: rect.width,
-                height: rect.height,
-                moved: false
-            };
+            drag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, left: rect.left, top: rect.top, width: rect.width, height: rect.height, moved: false };
             try { bar.setPointerCapture(event.pointerId); } catch (_) {}
             zUp(win);
         });
         bar.addEventListener("pointermove", event => {
-            if (!drag) return;
+            if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
             const dx = event.clientX - drag.startX;
             const dy = event.clientY - drag.startY;
             if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
             if (!drag.moved) return;
             event.preventDefault();
-            const taskbar = document.querySelector(".os-taskbar");
-            const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
-            const maxLeft = Math.max(0, window.innerWidth - drag.width);
-            const maxTop = Math.max(0, window.innerHeight - taskbarHeight - drag.height);
+            const bounds = usableBounds(win);
             win.style.position = "fixed";
+            win.style.width = Math.min(drag.width, window.innerWidth - 16) + "px";
+            win.style.height = Math.min(drag.height, window.innerHeight - bounds.taskbarHeight - 16) + "px";
             win.style.transform = "none";
             win.style.right = "auto";
             win.style.bottom = "auto";
+            const actualWidth = win.getBoundingClientRect().width;
+            const actualHeight = win.getBoundingClientRect().height;
+            const maxLeft = Math.max(0, window.innerWidth - actualWidth);
+            const maxTop = Math.max(0, window.innerHeight - bounds.taskbarHeight - actualHeight);
             win.style.left = Math.max(0, Math.min(maxLeft, drag.left + dx)) + "px";
             win.style.top = Math.max(0, Math.min(maxTop, drag.top + dy)) + "px";
         });
         const endDrag = () => { drag = null; };
         bar.addEventListener("pointerup", endDrag);
         bar.addEventListener("pointercancel", endDrag);
+        bar.addEventListener("lostpointercapture", endDrag);
     });
 
     // Persist personalization locally, without changing any audio/player logic.
@@ -749,15 +763,6 @@ setInterval(() => {
     if (bootSkip) bootSkip.addEventListener("click", finishBoot);
     window.setTimeout(finishBoot, 900);
     window.addEventListener("resize", () => {
-        document.querySelectorAll(".os-window:not(.is-maximized)").forEach(win => {
-            if (win.style.left && win.style.transform === "none") {
-                const taskbar = document.querySelector(".os-taskbar");
-                const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
-                const maxLeft = Math.max(0, window.innerWidth - win.offsetWidth);
-                const maxTop = Math.max(0, window.innerHeight - taskbarHeight - win.offsetHeight);
-                win.style.left = Math.max(0, Math.min(maxLeft, parseFloat(win.style.left) || 0)) + "px";
-                win.style.top = Math.max(0, Math.min(maxTop, parseFloat(win.style.top) || 0)) + "px";
-            }
-        });
+        document.querySelectorAll(".os-window:not(.is-maximized)").forEach(keepWindowInBounds);
     });
 })();
