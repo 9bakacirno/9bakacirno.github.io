@@ -594,7 +594,36 @@ setInterval(() => {
     document.querySelectorAll("[data-minimize]").forEach(button => button.addEventListener("click", () => minimizeWindow(button.dataset.minimize)));
     document.querySelectorAll("[data-maximize]").forEach(button => button.addEventListener("click", () => {
         const win = windows[button.dataset.maximize];
-        if (win) { win.classList.toggle("is-maximized"); zUp(win); }
+        if (!win) return;
+        if (!win.classList.contains("is-maximized")) {
+            // Save the normal position, then clear inline coordinates so CSS inset
+            // can correctly fill the desktop when maximized.
+            win.dataset.restoreLeft = win.style.left;
+            win.dataset.restoreTop = win.style.top;
+            win.classList.add("is-maximized");
+            win.style.left = "";
+            win.style.top = "";
+            win.style.transform = "";
+        } else {
+            win.classList.remove("is-maximized");
+            win.style.left = win.dataset.restoreLeft || "";
+            win.style.top = win.dataset.restoreTop || "";
+            win.style.transform = (win.style.left || win.style.top) ? "none" : "";
+            delete win.dataset.restoreLeft;
+            delete win.dataset.restoreTop;
+            // Re-clamp after restoring, for example when the viewport was resized.
+            requestAnimationFrame(() => {
+                const taskbar = document.querySelector(".os-taskbar");
+                const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
+                const rect = win.getBoundingClientRect();
+                const maxLeft = Math.max(0, window.innerWidth - rect.width);
+                const maxTop = Math.max(0, window.innerHeight - taskbarHeight - rect.height);
+                win.style.left = Math.max(0, Math.min(maxLeft, rect.left)) + "px";
+                win.style.top = Math.max(0, Math.min(maxTop, rect.top)) + "px";
+                win.style.transform = "none";
+            });
+        }
+        zUp(win);
     }));
     document.querySelectorAll("[data-restore]").forEach(button => button.addEventListener("click", () => {
         const id = button.dataset.restore;
@@ -638,12 +667,17 @@ setInterval(() => {
             // Keep the entire window inside the visible desktop area.
             const taskbar = document.querySelector(".os-taskbar");
             const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
-            const maxLeft = Math.max(0, window.innerWidth - win.offsetWidth);
-            const maxTop = Math.max(0, window.innerHeight - taskbarHeight - win.offsetHeight);
+            const width = win.getBoundingClientRect().width;
+            const height = win.getBoundingClientRect().height;
+            // Keep the whole window on-screen and above the taskbar.
+            const maxLeft = Math.max(0, window.innerWidth - width);
+            const maxTop = Math.max(0, window.innerHeight - taskbarHeight - height);
             const left = Math.max(0, Math.min(maxLeft, drag.left + dx));
             const top = Math.max(0, Math.min(maxTop, drag.top + dy));
             win.style.left = left + "px";
             win.style.top = top + "px";
+            win.style.right = "auto";
+            win.style.bottom = "auto";
             win.style.transform = "none";
         });
         const endDrag = () => { drag = null; };
