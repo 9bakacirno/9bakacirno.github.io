@@ -1772,7 +1772,9 @@ body.os-mode { height: 100vh; min-height: 100vh; overflow: hidden; background: #
 .os-brandmark strong,.os-brandmark small { display:block; }
 .os-brandmark strong { font:600 11px "Orbitron",sans-serif; letter-spacing:1.4px; }
 .os-brandmark small { margin-top:5px; color:#9dbbd2; font-size:10px; }
-.desktop-icons { position:absolute; top:112px; left:25px; display:grid; gap:9px; width:88px; }
+.desktop-icons { position:absolute; z-index:10; top:112px; left:25px; display:block; width:96px; height:calc(100% - 150px); pointer-events:none; }
+.desktop-icons .desktop-icon { pointer-events:auto; cursor:grab; }
+.desktop-icons .desktop-icon:active { cursor:grabbing; }
 .desktop-icon {
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px;
     min-height:82px; padding:9px 4px; border:1px solid transparent; border-radius:13px;
@@ -1908,8 +1910,8 @@ body.os-booting .os-desktop { visibility:hidden; }
     .os-brandmark > span { width:32px; height:32px; border-radius:10px; font-size:16px; }
     .os-brandmark strong { font-size:9px; }
     .os-brandmark small { font-size:9px; }
-    .desktop-icons { top:91px; left:8px; width:70px; gap:5px; }
-    .desktop-icon { min-height:72px; }
+    .desktop-icons { top:91px; left:5px; width:76px; height:calc(100% - 140px); }
+    .desktop-icons .desktop-icon { width:76px !important; min-height:68px; padding:5px 2px; }
     .desktop-icon > span { width:37px; height:37px; font-size:19px; }
     .desktop-icon b { font-size:10px; }
     .os-window { width:calc(100vw - 16px); height:calc(100dvh - var(--os-bar-height) - 82px); min-width:0; min-height:180px; max-width:calc(100vw - 16px); max-height:calc(100dvh - var(--os-bar-height) - 16px); left:50%; top:calc(50% - 16px); resize:none; }
