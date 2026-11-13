@@ -668,7 +668,10 @@ setInterval(() => {
             if (event.target.closest("button") || win.classList.contains("is-maximized")) return;
             if (event.button !== undefined && event.button !== 0) return;
             const rect = win.getBoundingClientRect();
-            drag = { x:event.clientX, y:event.clientY, left:rect.left, top:rect.top, moved:false };
+            const parentRect = win.offsetParent ? win.offsetParent.getBoundingClientRect() : { left:0, top:0 };
+            // Store viewport coordinates plus the containing block origin.
+            // getBoundingClientRect() is viewport-based; style.left/top are parent-based.
+            drag = { x:event.clientX, y:event.clientY, left:rect.left, top:rect.top, parentLeft:parentRect.left, parentTop:parentRect.top, moved:false };
             try { bar.setPointerCapture(event.pointerId); } catch (_) {}
             zUp(win);
         });
@@ -682,11 +685,16 @@ setInterval(() => {
             const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
             const width = win.getBoundingClientRect().width;
             const height = win.getBoundingClientRect().height;
-            // Keep the whole window on-screen and above the taskbar.
-            const maxLeft = Math.max(0, window.innerWidth - width);
-            const maxTop = Math.max(0, window.innerHeight - taskbarHeight - height);
-            const left = Math.max(0, Math.min(maxLeft, drag.left + dx));
-            const top = Math.max(0, Math.min(maxTop, drag.top + dy));
+            const parent = win.offsetParent;
+            const parentWidth = parent ? parent.clientWidth : window.innerWidth;
+            const parentHeight = parent ? parent.clientHeight : window.innerHeight;
+            // Convert viewport coordinates into the window's containing-block coordinates.
+            const desiredLeft = drag.left + dx - drag.parentLeft;
+            const desiredTop = drag.top + dy - drag.parentTop;
+            const maxLeft = Math.max(0, parentWidth - width);
+            const maxTop = Math.max(0, parentHeight - taskbarHeight - height);
+            const left = Math.max(0, Math.min(maxLeft, desiredLeft));
+            const top = Math.max(0, Math.min(maxTop, desiredTop));
             win.style.left = left + "px";
             win.style.top = top + "px";
             win.style.right = "auto";
