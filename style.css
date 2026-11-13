@@ -1943,6 +1943,13 @@ body.os-booting .os-desktop { visibility:hidden; }
 ========================= */
 .shared-music-widget .music-panels {
     width: min(390px, calc(100vw - 100px));
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    box-sizing: border-box;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(142,234,255,.45) transparent;
     gap: 12px;
     padding: 12px;
     border: 1px solid rgba(142,234,255,.32);
