@@ -596,21 +596,34 @@ setInterval(() => {
         const win = windows[button.dataset.maximize];
         if (!win) return;
         if (!win.classList.contains("is-maximized")) {
-            // Save the normal position, then clear inline coordinates so CSS inset
-            // can correctly fill the desktop when maximized.
+            // Save every inline coordinate: dragging sets right/bottom to auto,
+            // which would override the CSS inset used by the maximized window.
             win.dataset.restoreLeft = win.style.left;
             win.dataset.restoreTop = win.style.top;
+            win.dataset.restoreRight = win.style.right;
+            win.dataset.restoreBottom = win.style.bottom;
+            win.dataset.restoreTransform = win.style.transform;
             win.classList.add("is-maximized");
+            // Clear all inline offsets so .is-maximized can control all four edges.
             win.style.left = "";
             win.style.top = "";
+            win.style.right = "";
+            win.style.bottom = "";
+            win.style.width = "";
+            win.style.height = "";
             win.style.transform = "";
         } else {
             win.classList.remove("is-maximized");
             win.style.left = win.dataset.restoreLeft || "";
             win.style.top = win.dataset.restoreTop || "";
-            win.style.transform = (win.style.left || win.style.top) ? "none" : "";
+            win.style.right = win.dataset.restoreRight || "";
+            win.style.bottom = win.dataset.restoreBottom || "";
+            win.style.transform = win.dataset.restoreTransform || ((win.style.left || win.style.top) ? "none" : "");
             delete win.dataset.restoreLeft;
             delete win.dataset.restoreTop;
+            delete win.dataset.restoreRight;
+            delete win.dataset.restoreBottom;
+            delete win.dataset.restoreTransform;
             // Re-clamp after restoring, for example when the viewport was resized.
             requestAnimationFrame(() => {
                 const taskbar = document.querySelector(".os-taskbar");
