@@ -515,6 +515,73 @@ setInterval(() => {
         clock.classList.toggle("is-unlit", !isLit);
     });
 
+    // Drag the clock by its top bar; leave the light toggle clickable.
+    const dragHandle = clock.querySelector(".pixel-clock-top");
+    const positionKey = "iceFairyPixelClockPosition";
+    let clockDrag = null;
+    try {
+        const saved = JSON.parse(localStorage.getItem(positionKey) || "null");
+        if (saved && Number.isFinite(saved.left) && Number.isFinite(saved.top)) {
+            clock.style.left = saved.left + "px";
+            clock.style.top = saved.top + "px";
+            clock.style.right = "auto";
+        }
+    } catch (_) {}
+
+    dragHandle.style.cursor = "grab";
+    dragHandle.style.touchAction = "none";
+    dragHandle.addEventListener("pointerdown", event => {
+        if (event.target.closest("button") || event.button !== 0) return;
+        const rect = clock.getBoundingClientRect();
+        clock.style.left = rect.left + "px";
+        clock.style.top = rect.top + "px";
+        clock.style.right = "auto";
+        clockDrag = {
+            id: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            left: rect.left,
+            top: rect.top,
+            moved: false
+        };
+        dragHandle.style.cursor = "grabbing";
+        try { dragHandle.setPointerCapture(event.pointerId); } catch (_) {}
+    });
+    dragHandle.addEventListener("pointermove", event => {
+        if (!clockDrag || event.pointerId !== clockDrag.id) return;
+        const dx = event.clientX - clockDrag.startX;
+        const dy = event.clientY - clockDrag.startY;
+        if (!clockDrag.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
+        clockDrag.moved = true;
+        event.preventDefault();
+        const maxLeft = Math.max(0, window.innerWidth - clock.offsetWidth);
+        const maxTop = Math.max(0, window.innerHeight - clock.offsetHeight);
+        clock.style.left = Math.max(0, Math.min(maxLeft, clockDrag.left + dx)) + "px";
+        clock.style.top = Math.max(0, Math.min(maxTop, clockDrag.top + dy)) + "px";
+    });
+    const endClockDrag = event => {
+        if (!clockDrag || (event && event.pointerId !== undefined && event.pointerId !== clockDrag.id)) return;
+        if (clockDrag.moved) {
+            try {
+                localStorage.setItem(positionKey, JSON.stringify({
+                    left: parseFloat(clock.style.left) || 0,
+                    top: parseFloat(clock.style.top) || 0
+                }));
+            } catch (_) {}
+        }
+        clockDrag = null;
+        dragHandle.style.cursor = "grab";
+    };
+    dragHandle.addEventListener("pointerup", endClockDrag);
+    dragHandle.addEventListener("pointercancel", endClockDrag);
+    window.addEventListener("resize", () => {
+        if (clock.hidden || getComputedStyle(clock).display === "none") return;
+        const rect = clock.getBoundingClientRect();
+        clock.style.left = Math.max(0, Math.min(window.innerWidth - rect.width, rect.left)) + "px";
+        clock.style.top = Math.max(0, Math.min(window.innerHeight - rect.height, rect.top)) + "px";
+        clock.style.right = "auto";
+    });
+
     updateLocalClock();
     window.setInterval(updateLocalClock, 1000);
 })();
