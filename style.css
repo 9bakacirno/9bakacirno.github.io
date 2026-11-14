@@ -2047,3 +2047,8 @@ body.os-mode .pixel-clock {
 }
 /* Keep maximized window controls above the clock when a window fills the screen. */
 .os-window.is-maximized { z-index: 130 !important; }
+
+
+/* The local pixel clock can be repositioned by dragging its header. */
+.pixel-clock-top { cursor: grab; touch-action: none; user-select: none; }
+.pixel-clock-top:active { cursor: grabbing; }
