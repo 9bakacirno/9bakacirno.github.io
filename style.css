@@ -2023,4 +2023,12 @@ body.os-booting .os-desktop { visibility:hidden; }
 /* Keep Baka Music compact when its player panels are closed. */
 .shared-music-widget:not(.is-expanded) .music-panels { display:none !important; }
 /* The old landing-page moon should not appear behind ICE FAIRY OS. */
-body.os-mode > .moon { display:none !important; }
+body.os-mode .moon { display:none !important; }
+
+/* Maximized windows must use the viewport, above restored inline sizes. */
+.os-window.is-maximized {
+ position:fixed !important; left:14px !important; top:14px !important;
+ right:14px !important; bottom:calc(var(--os-bar-height) + 14px) !important;
+ width:auto !important; height:auto !important; min-width:0 !important; min-height:0 !important;
+ max-width:none !important; max-height:none !important; transform:none !important; resize:none !important;
+}
