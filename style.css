@@ -2035,3 +2035,15 @@ body.os-mode .moon { display:none !important; }
 @media (max-width:600px) {
   .os-window.is-maximized { inset:8px 8px calc(var(--os-bar-height) + 8px) !important; }
 }
+
+
+/* Keep the clock panel opaque above desktop decorations so the sparkle cannot visually overlap its corner. */
+body.os-mode .pixel-clock {
+    z-index: 120 !important;
+    isolation: isolate;
+    background: rgba(5, 12, 29, .97) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+/* Keep maximized window controls above the clock when a window fills the screen. */
+.os-window.is-maximized { z-index: 130 !important; }
