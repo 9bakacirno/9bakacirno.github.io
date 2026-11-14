@@ -605,13 +605,15 @@ setInterval(() => {
             win.dataset.restoreHeight = String(rect.height);
             win.classList.add("is-maximized");
             win.style.position = "fixed";
-            win.style.left = "";
-            win.style.top = "";
-            win.style.right = "";
-            win.style.bottom = "";
-            win.style.width = "";
-            win.style.height = "";
-            win.style.transform = "";
+            win.style.left = "14px";
+            win.style.top = "14px";
+            win.style.right = "14px";
+            win.style.bottom = "calc(var(--os-bar-height) + 14px)";
+            win.style.width = "auto";
+            win.style.height = "auto";
+            win.style.maxWidth = "none";
+            win.style.maxHeight = "none";
+            win.style.transform = "none";
         } else {
             win.classList.remove("is-maximized");
             const taskbar = document.querySelector(".os-taskbar");
@@ -621,6 +623,9 @@ setInterval(() => {
             const maxLeft = Math.max(0, window.innerWidth - width);
             const maxTop = Math.max(0, window.innerHeight - taskbarHeight - height);
             win.style.position = "fixed";
+            win.style.inset = "auto";
+            win.style.maxWidth = "calc(100vw - 16px)";
+            win.style.maxHeight = "calc(100dvh - var(--os-bar-height) - 16px)";
             win.style.width = width + "px";
             win.style.height = height + "px";
             win.style.left = Math.max(0, Math.min(maxLeft, Number(win.dataset.restoreX) || 0)) + "px";
