@@ -2025,13 +2025,13 @@ body.os-booting .os-desktop { visibility:hidden; }
 /* The old landing-page moon should not appear behind ICE FAIRY OS. */
 body.os-mode .moon { display:none !important; }
 
-/* Maximized windows must use the viewport, above restored inline sizes. */
+/* Keep maximized windows inside the viewport on every maximize/restore cycle. */
 .os-window.is-maximized {
- position:fixed !important; left:14px !important; top:14px !important;
- right:14px !important; bottom:calc(var(--os-bar-height) + 14px) !important;
- width:auto !important; height:auto !important; min-width:0 !important; min-height:0 !important;
- max-width:none !important; max-height:none !important; transform:none !important; resize:none !important;
+  position:fixed !important; inset:14px 14px calc(var(--os-bar-height) + 14px) !important;
+  width:auto !important; height:auto !important; min-width:0 !important; min-height:0 !important;
+  max-width:none !important; max-height:none !important; transform:none !important; resize:none !important;
+  z-index:60 !important;
 }
-
-/* A maximized window must sit above the floating clock so its titlebar controls stay clickable. */
-.os-window.is-maximized { z-index: 60 !important; }
+@media (max-width:600px) {
+  .os-window.is-maximized { inset:8px 8px calc(var(--os-bar-height) + 8px) !important; }
+}
