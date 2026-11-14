@@ -670,50 +670,61 @@ setInterval(() => {
         const taskbar = document.querySelector(".os-taskbar");
         const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
         const margin = window.innerWidth <= 600 ? 8 : 14;
+        const viewportW = document.documentElement.clientWidth || window.innerWidth;
+        const viewportH = window.innerHeight;
+        const maxHeight = Math.max(160, viewportH - taskbarHeight - margin * 2);
 
         if (!win.classList.contains("is-maximized")) {
-            // Always capture the actual restored geometry, never the previous maximized box.
+            // Save a clamped normal geometry once per maximize cycle.
             const rect = win.getBoundingClientRect();
-            win.dataset.restoreX = String(Math.max(0, Math.min(rect.left, window.innerWidth - 120)));
-            win.dataset.restoreY = String(Math.max(0, Math.min(rect.top, window.innerHeight - taskbarHeight - 100)));
-            win.dataset.restoreWidth = String(Math.min(rect.width, window.innerWidth - margin * 2));
-            win.dataset.restoreHeight = String(Math.min(rect.height, window.innerHeight - taskbarHeight - margin * 2));
+            const width = Math.max(1, Math.min(rect.width || 720, viewportW - margin * 2));
+            const height = Math.max(1, Math.min(rect.height || 480, maxHeight));
+            const left = Math.max(margin, Math.min(viewportW - width - margin, rect.left));
+            const top = Math.max(margin, Math.min(viewportH - taskbarHeight - height - margin, rect.top));
+            win.dataset.restoreX = String(left);
+            win.dataset.restoreY = String(top);
+            win.dataset.restoreWidth = String(width);
+            win.dataset.restoreHeight = String(height);
 
-            // Clear stale dimensions first so repeated maximize/restore cycles stay deterministic.
-            win.style.inset = "auto";
-            win.style.width = "auto";
-            win.style.height = "auto";
-            win.style.maxWidth = "none";
-            win.style.maxHeight = "none";
-            win.style.transform = "none";
-            win.style.position = "fixed";
-            win.style.left = margin + "px";
-            win.style.top = margin + "px";
-            win.style.right = margin + "px";
-            win.style.bottom = "calc(var(--os-bar-height) + " + margin + "px)";
             win.classList.add("is-maximized");
+            win.style.setProperty("position", "fixed", "important");
+            win.style.setProperty("inset", margin + "px " + margin + "px calc(var(--os-bar-height) + " + margin + "px)", "important");
+            win.style.setProperty("left", margin + "px", "important");
+            win.style.setProperty("right", margin + "px", "important");
+            win.style.setProperty("top", margin + "px", "important");
+            win.style.setProperty("bottom", "calc(var(--os-bar-height) + " + margin + "px)", "important");
+            win.style.setProperty("width", "auto", "important");
+            win.style.setProperty("height", "auto", "important");
+            win.style.setProperty("min-width", "0", "important");
+            win.style.setProperty("min-height", "0", "important");
+            win.style.setProperty("max-width", "none", "important");
+            win.style.setProperty("max-height", "none", "important");
+            win.style.setProperty("transform", "none", "important");
+            win.style.setProperty("box-sizing", "border-box", "important");
         } else {
             win.classList.remove("is-maximized");
-            const width = Math.max(280, Math.min(Number(win.dataset.restoreWidth) || 720, window.innerWidth - margin * 2));
-            const height = Math.max(220, Math.min(Number(win.dataset.restoreHeight) || 480, window.innerHeight - taskbarHeight - margin * 2));
-            const maxLeft = Math.max(margin, window.innerWidth - width - margin);
-            const maxTop = Math.max(margin, window.innerHeight - taskbarHeight - height - margin);
+            // Remove all maximize-only inline constraints before restoring normal geometry.
+            ["inset","position","left","right","top","bottom","width","height","min-width","min-height","max-width","max-height","transform","box-sizing"].forEach(prop => win.style.removeProperty(prop));
+
+            const width = Math.max(1, Math.min(Number(win.dataset.restoreWidth) || 720, viewportW - margin * 2));
+            const height = Math.max(1, Math.min(Number(win.dataset.restoreHeight) || 480, maxHeight));
+            const maxLeft = Math.max(margin, viewportW - width - margin);
+            const maxTop = Math.max(margin, viewportH - taskbarHeight - height - margin);
             const left = Math.max(margin, Math.min(maxLeft, Number(win.dataset.restoreX) || margin));
             const top = Math.max(margin, Math.min(maxTop, Number(win.dataset.restoreY) || margin));
 
-            win.style.position = "fixed";
-            win.style.inset = "auto";
-            win.style.width = width + "px";
-            win.style.height = height + "px";
-            win.style.minWidth = "0";
-            win.style.minHeight = "0";
-            win.style.maxWidth = "calc(100vw - " + margin * 2 + "px)";
-            win.style.maxHeight = "calc(100dvh - var(--os-bar-height) - " + margin * 2 + "px)";
-            win.style.left = left + "px";
-            win.style.top = top + "px";
-            win.style.right = "auto";
-            win.style.bottom = "auto";
-            win.style.transform = "none";
+            win.style.setProperty("position", "fixed");
+            win.style.setProperty("left", left + "px");
+            win.style.setProperty("top", top + "px");
+            win.style.setProperty("right", "auto");
+            win.style.setProperty("bottom", "auto");
+            win.style.setProperty("width", width + "px");
+            win.style.setProperty("height", height + "px");
+            win.style.setProperty("min-width", "0");
+            win.style.setProperty("min-height", "0");
+            win.style.setProperty("max-width", "calc(100vw - " + margin * 2 + "px)");
+            win.style.setProperty("max-height", "calc(100dvh - var(--os-bar-height) - " + margin * 2 + "px)");
+            win.style.setProperty("transform", "none");
 
             delete win.dataset.restoreX;
             delete win.dataset.restoreY;
