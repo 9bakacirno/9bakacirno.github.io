@@ -2032,3 +2032,6 @@ body.os-mode .moon { display:none !important; }
  width:auto !important; height:auto !important; min-width:0 !important; min-height:0 !important;
  max-width:none !important; max-height:none !important; transform:none !important; resize:none !important;
 }
+
+/* A maximized window must sit above the floating clock so its titlebar controls stay clickable. */
+.os-window.is-maximized { z-index: 60 !important; }
