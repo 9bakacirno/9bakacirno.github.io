@@ -597,42 +597,55 @@ setInterval(() => {
     document.querySelectorAll("[data-maximize]").forEach(button => button.addEventListener("click", () => {
         const win = windows[button.dataset.maximize];
         if (!win) return;
+
+        const taskbar = document.querySelector(".os-taskbar");
+        const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
+        const margin = window.innerWidth <= 600 ? 8 : 14;
+
         if (!win.classList.contains("is-maximized")) {
+            // Always capture the actual restored geometry, never the previous maximized box.
             const rect = win.getBoundingClientRect();
-            win.dataset.restoreX = String(rect.left);
-            win.dataset.restoreY = String(rect.top);
-            win.dataset.restoreWidth = String(rect.width);
-            win.dataset.restoreHeight = String(rect.height);
-            win.classList.add("is-maximized");
-            win.style.position = "fixed";
-            win.style.left = "14px";
-            win.style.top = "14px";
-            win.style.right = "14px";
-            win.style.bottom = "calc(var(--os-bar-height) + 14px)";
+            win.dataset.restoreX = String(Math.max(0, Math.min(rect.left, window.innerWidth - 120)));
+            win.dataset.restoreY = String(Math.max(0, Math.min(rect.top, window.innerHeight - taskbarHeight - 100)));
+            win.dataset.restoreWidth = String(Math.min(rect.width, window.innerWidth - margin * 2));
+            win.dataset.restoreHeight = String(Math.min(rect.height, window.innerHeight - taskbarHeight - margin * 2));
+
+            // Clear stale dimensions first so repeated maximize/restore cycles stay deterministic.
+            win.style.inset = "auto";
             win.style.width = "auto";
             win.style.height = "auto";
             win.style.maxWidth = "none";
             win.style.maxHeight = "none";
             win.style.transform = "none";
+            win.style.position = "fixed";
+            win.style.left = margin + "px";
+            win.style.top = margin + "px";
+            win.style.right = margin + "px";
+            win.style.bottom = "calc(var(--os-bar-height) + " + margin + "px)";
+            win.classList.add("is-maximized");
         } else {
             win.classList.remove("is-maximized");
-            const taskbar = document.querySelector(".os-taskbar");
-            const taskbarHeight = taskbar ? taskbar.getBoundingClientRect().height : 58;
-            const width = Math.min(Number(win.dataset.restoreWidth) || 720, window.innerWidth - 16);
-            const height = Math.min(Number(win.dataset.restoreHeight) || 480, window.innerHeight - taskbarHeight - 16);
-            const maxLeft = Math.max(0, window.innerWidth - width);
-            const maxTop = Math.max(0, window.innerHeight - taskbarHeight - height);
+            const width = Math.max(280, Math.min(Number(win.dataset.restoreWidth) || 720, window.innerWidth - margin * 2));
+            const height = Math.max(220, Math.min(Number(win.dataset.restoreHeight) || 480, window.innerHeight - taskbarHeight - margin * 2));
+            const maxLeft = Math.max(margin, window.innerWidth - width - margin);
+            const maxTop = Math.max(margin, window.innerHeight - taskbarHeight - height - margin);
+            const left = Math.max(margin, Math.min(maxLeft, Number(win.dataset.restoreX) || margin));
+            const top = Math.max(margin, Math.min(maxTop, Number(win.dataset.restoreY) || margin));
+
             win.style.position = "fixed";
             win.style.inset = "auto";
-            win.style.maxWidth = "calc(100vw - 16px)";
-            win.style.maxHeight = "calc(100dvh - var(--os-bar-height) - 16px)";
             win.style.width = width + "px";
             win.style.height = height + "px";
-            win.style.left = Math.max(0, Math.min(maxLeft, Number(win.dataset.restoreX) || 0)) + "px";
-            win.style.top = Math.max(0, Math.min(maxTop, Number(win.dataset.restoreY) || 0)) + "px";
+            win.style.minWidth = "0";
+            win.style.minHeight = "0";
+            win.style.maxWidth = "calc(100vw - " + margin * 2 + "px)";
+            win.style.maxHeight = "calc(100dvh - var(--os-bar-height) - " + margin * 2 + "px)";
+            win.style.left = left + "px";
+            win.style.top = top + "px";
             win.style.right = "auto";
             win.style.bottom = "auto";
             win.style.transform = "none";
+
             delete win.dataset.restoreX;
             delete win.dataset.restoreY;
             delete win.dataset.restoreWidth;
