@@ -674,8 +674,11 @@ setInterval(() => {
         const viewportH = window.innerHeight;
         const maxHeight = Math.max(160, viewportH - taskbarHeight - margin * 2);
 
+        // Disable the forwards-filled entrance animation: its transform can override restored geometry.
+        win.style.setProperty("animation", "none", "important");
+        win.style.setProperty("transform", "none", "important");
+
         if (!win.classList.contains("is-maximized")) {
-            // Save a clamped normal geometry once per maximize cycle.
             const rect = win.getBoundingClientRect();
             const width = Math.max(1, Math.min(rect.width || 720, viewportW - margin * 2));
             const height = Math.max(1, Math.min(rect.height || 480, maxHeight));
@@ -699,11 +702,9 @@ setInterval(() => {
             win.style.setProperty("min-height", "0", "important");
             win.style.setProperty("max-width", "none", "important");
             win.style.setProperty("max-height", "none", "important");
-            win.style.setProperty("transform", "none", "important");
             win.style.setProperty("box-sizing", "border-box", "important");
         } else {
             win.classList.remove("is-maximized");
-            // Remove all maximize-only inline constraints before restoring normal geometry.
             ["inset","position","left","right","top","bottom","width","height","min-width","min-height","max-width","max-height","transform","box-sizing"].forEach(prop => win.style.removeProperty(prop));
 
             const width = Math.max(1, Math.min(Number(win.dataset.restoreWidth) || 720, viewportW - margin * 2));
@@ -713,18 +714,19 @@ setInterval(() => {
             const left = Math.max(margin, Math.min(maxLeft, Number(win.dataset.restoreX) || margin));
             const top = Math.max(margin, Math.min(maxTop, Number(win.dataset.restoreY) || margin));
 
-            win.style.setProperty("position", "fixed");
-            win.style.setProperty("left", left + "px");
-            win.style.setProperty("top", top + "px");
-            win.style.setProperty("right", "auto");
-            win.style.setProperty("bottom", "auto");
-            win.style.setProperty("width", width + "px");
-            win.style.setProperty("height", height + "px");
-            win.style.setProperty("min-width", "0");
-            win.style.setProperty("min-height", "0");
-            win.style.setProperty("max-width", "calc(100vw - " + margin * 2 + "px)");
-            win.style.setProperty("max-height", "calc(100dvh - var(--os-bar-height) - " + margin * 2 + "px)");
-            win.style.setProperty("transform", "none");
+            win.style.setProperty("animation", "none", "important");
+            win.style.setProperty("position", "fixed", "important");
+            win.style.setProperty("left", left + "px", "important");
+            win.style.setProperty("top", top + "px", "important");
+            win.style.setProperty("right", "auto", "important");
+            win.style.setProperty("bottom", "auto", "important");
+            win.style.setProperty("width", width + "px", "important");
+            win.style.setProperty("height", height + "px", "important");
+            win.style.setProperty("min-width", "0", "important");
+            win.style.setProperty("min-height", "0", "important");
+            win.style.setProperty("max-width", "calc(100vw - " + margin * 2 + "px)", "important");
+            win.style.setProperty("max-height", "calc(100dvh - var(--os-bar-height) - " + margin * 2 + "px)", "important");
+            win.style.setProperty("transform", "none", "important");
 
             delete win.dataset.restoreX;
             delete win.dataset.restoreY;
