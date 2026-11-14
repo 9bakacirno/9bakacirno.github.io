@@ -674,12 +674,12 @@ setInterval(() => {
         const viewportH = window.innerHeight;
         const maxHeight = Math.max(160, viewportH - taskbarHeight - margin * 2);
 
-        // Disable the forwards-filled entrance animation: its transform can override restored geometry.
-        win.style.setProperty("animation", "none", "important");
-        win.style.setProperty("transform", "none", "important");
-
         if (!win.classList.contains("is-maximized")) {
+            // Capture the visible geometry BEFORE clearing the centering transform.
             const rect = win.getBoundingClientRect();
+            // Disable the forwards-filled entrance animation after measuring the current position.
+            win.style.setProperty("animation", "none", "important");
+            win.style.setProperty("transform", "none", "important");
             const width = Math.max(1, Math.min(rect.width || 720, viewportW - margin * 2));
             const height = Math.max(1, Math.min(rect.height || 480, maxHeight));
             const left = Math.max(margin, Math.min(viewportW - width - margin, rect.left));
@@ -704,6 +704,9 @@ setInterval(() => {
             win.style.setProperty("max-height", "none", "important");
             win.style.setProperty("box-sizing", "border-box", "important");
         } else {
+            // Disable the entrance animation before restoring the saved normal geometry.
+            win.style.setProperty("animation", "none", "important");
+            win.style.setProperty("transform", "none", "important");
             win.classList.remove("is-maximized");
             ["inset","position","left","right","top","bottom","width","height","min-width","min-height","max-width","max-height","transform","box-sizing"].forEach(prop => win.style.removeProperty(prop));
 
