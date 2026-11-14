@@ -1939,7 +1939,15 @@ body.os-booting .os-desktop { visibility:hidden; }
     .taskbar-clock { min-width:49px; }
     .taskbar-clock b { font-size:10px; }
     .taskbar-clock small { font-size:8px; }
-    .pixel-clock { display:none; }
+    /* Keep the draggable pixel clock visible on phones. */
+    .pixel-clock {
+        display:block;
+        top:10px;
+        right:10px;
+        width:max-content;
+        max-width:calc(100vw - 20px);
+        padding:8px 9px;
+    }
     .shared-music-widget { z-index:150; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2052,3 +2060,161 @@ body.os-mode .pixel-clock {
 /* The local pixel clock can be repositioned by dragging its header. */
 .pixel-clock-top { cursor: grab; touch-action: none; user-select: none; }
 .pixel-clock-top:active { cursor: grabbing; }
+
+
+/* =========================================================
+   MOBILE-FIRST ICE FAIRY OS POLISH
+   Keep desktop styling intact while making touch layouts usable.
+========================================================= */
+@media (max-width: 700px) {
+    body.os-mode {
+        min-height: 100dvh;
+        min-height: 100svh;
+        overscroll-behavior: none;
+    }
+    .os-desktop {
+        min-height: 100dvh;
+    }
+    .os-brandmark {
+        max-width: calc(100vw - 160px);
+        gap: 7px;
+    }
+    .os-brandmark strong,
+    .os-brandmark small {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .pixel-clock {
+        z-index: 125 !important;
+        max-width: min(176px, calc(100vw - 20px));
+        padding: 7px 8px;
+        border-radius: 10px;
+        background: rgba(5, 12, 29, .97) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    .pixel-clock-top {
+        gap: 6px;
+        margin-bottom: 5px;
+    }
+    .pixel-clock-label { font-size: 6px; }
+    .pixel-clock-time { font-size: 9px; letter-spacing: 0; }
+    .pixel-clock-date { margin-top: 4px; font-size: 5px; }
+    .clock-light-toggle { width: 22px; height: 22px; }
+    .desktop-icons {
+        top: 104px;
+        left: 6px;
+        right: 6px;
+        height: calc(100% - var(--os-bar-height) - 118px);
+        touch-action: none;
+    }
+    .desktop-icons .desktop-icon {
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    .os-window {
+        box-sizing: border-box;
+        left: 8px !important;
+        top: 72px !important;
+        transform: none !important;
+        width: calc(100vw - 16px) !important;
+        height: calc(100dvh - var(--os-bar-height) - 88px) !important;
+        max-width: calc(100vw - 16px) !important;
+        max-height: calc(100dvh - var(--os-bar-height) - 16px) !important;
+        min-width: 0 !important;
+        min-height: 180px !important;
+        border-radius: 14px;
+        resize: none;
+    }
+    .os-window.is-maximized {
+        inset: 8px 8px calc(var(--os-bar-height) + 8px) !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: none !important;
+        max-height: none !important;
+        min-height: 0 !important;
+    }
+    .os-titlebar {
+        min-height: 44px;
+        flex-basis: 44px;
+        padding-inline: 9px 6px;
+        gap: 5px;
+    }
+    .os-window-app { gap: 5px; font-size: 10px; }
+    .os-window-app > span { font-size: 16px; }
+    .os-window-controls { flex-shrink: 0; gap: 1px; }
+    .os-window-controls button {
+        width: 30px;
+        height: 30px;
+        touch-action: manipulation;
+    }
+    .os-window-body { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+    .os-window-body > .container { padding: 12px 10px 24px; }
+    .os-settings-content { padding: 12px; }
+    .setting-row { gap: 10px; padding: 12px 0; }
+    .setting-row > * { min-width: 0; }
+    .os-taskbar {
+        box-sizing: border-box;
+        gap: 4px;
+        padding: 6px max(7px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left));
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .os-taskbar::-webkit-scrollbar { display: none; }
+    .os-start-button, .taskbar-app { flex: 0 0 auto; min-height: 40px; padding-inline: 9px; }
+    .taskbar-spacer { flex: 1 0 4px; min-width: 4px; }
+    .taskbar-clock { flex: 0 0 auto; min-width: 45px; }
+    .taskbar-clock small { display: none; }
+    .shared-music-widget {
+        width: 48px;
+        z-index: 150 !important;
+    }
+    .shared-music-widget .music-toggle {
+        width: 48px;
+        height: 48px;
+        font-size: 23px;
+    }
+    .shared-music-widget .music-panels {
+        top: 8px;
+        bottom: 8px;
+        right: 56px;
+        left: auto;
+        transform: none;
+        width: min(320px, calc(100vw - 72px));
+        max-height: calc(100dvh - 16px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        gap: 8px;
+    }
+    .shared-music-widget.docked-left .music-panels {
+        left: 56px;
+        right: auto;
+    }
+    .shared-music-widget .music-panel.panel {
+        box-sizing: border-box;
+        max-height: min(42dvh, 330px);
+        padding: 11px;
+        border-radius: 17px;
+    }
+    .shared-music-widget .mini-player-title { font-size: 15px; }
+    .shared-music-widget .mini-player-controls button,
+    .shared-music-widget .music-controls button,
+    .shared-music-widget .music-close,
+    .shared-music-widget input[type="range"] {
+        touch-action: manipulation;
+    }
+}
+@media (max-width: 390px) {
+    .os-brandmark { max-width: calc(100vw - 145px); }
+    .os-brandmark > span { width: 28px; height: 28px; }
+    .os-brandmark strong { font-size: 8px; }
+    .os-brandmark small { font-size: 8px; }
+    .pixel-clock { max-width: 154px; padding: 6px 7px; }
+    .pixel-clock-time { font-size: 8px; }
+    .os-start-button { padding-inline: 7px; }
+    .taskbar-app { padding-inline: 7px; }
+}
