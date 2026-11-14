@@ -522,8 +522,10 @@ setInterval(() => {
     try {
         const saved = JSON.parse(localStorage.getItem(positionKey) || "null");
         if (saved && Number.isFinite(saved.left) && Number.isFinite(saved.top)) {
-            clock.style.left = saved.left + "px";
-            clock.style.top = saved.top + "px";
+            const maxLeft = Math.max(0, window.innerWidth - clock.offsetWidth);
+            const maxTop = Math.max(0, window.innerHeight - clock.offsetHeight);
+            clock.style.left = Math.max(0, Math.min(maxLeft, saved.left)) + "px";
+            clock.style.top = Math.max(0, Math.min(maxTop, saved.top)) + "px";
             clock.style.right = "auto";
         }
     } catch (_) {}
